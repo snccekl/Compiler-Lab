@@ -1,0 +1,50 @@
+%{
+    
+    void handle_yytext(char* identification, char* yytext){
+        yylval.node = createNode(identification,yytext);
+    }
+    extern int error;//有多少错误
+%}
+
+%option yylineno
+digit   [0-9]
+letter  [_a-zA-Z]
+id      {letter}({letter}|{digit})*
+delim   [ \t\r\n]
+ws      {delim}+
+relop   >|<|==|>=|<=|!=
+type    int|float
+int     [1-9]{digit}*|0
+float   {digit}+\.{digit}+
+
+%%
+{ws}    {handle_yytext("ws",yytext);}
+{int}   {handle_yytext("INT",yytext); return INT;}
+{float} {handle_yytext("FLOAT",yytext); return FLOAT};
+{id}    {handle_yytext("ID",yytext); return ID};
+";"     {handle_yytext("SEMI",yytext); return SEMI;}
+","     {handle_yytext("COMMA",yytext); return COMMA;}
+"="     {handle_yytext("ASSIGNOP",yytext); return ASSIGNOP;}
+{relop} {handle_yytext("RELOP",yytext); return RELOP;}
+"+"     {handle_yytext("PLUS",yytext); return PLUS;}
+"-"     {handle_yytext("MINUS",yytext); return MINUS;}
+"*"     {handle_yytext("STAR",yytext); return STAR;}
+"/"     {handle_yytext("DIV",yytext); return DIV;}
+"&&"    {handle_yytext("AND",yytext); return AND;}
+"||"    {handle_yytext("OR",yytext); return OR;}
+"."     {handle_yytext("DOT",yytext); return DOT;}
+"!"     {handle_yytext("NOT",yytext); return NOT;}
+{type}  {handle_yytext("TYPE",yytext); return TYPE;}
+"("     {handle_yytext("LP",yytext); return LP;}
+")"     {handle_yytext("RP",yytext); return RP;}
+"["     {handle_yytext("LB",yytext); return LB;}
+"]"     {handle_yytext("RB",yytext); return RB;}
+"{"     {handle_yytext("LC",yytext); return LC;}
+"}"     {handle_yytext("RC",yytext); return RC;}
+struct  {handle("STRUCT",yytext); return STRUCT;}
+return  {handle("RETURN",yytext); return RETURN;}
+if      {handle("IF",yytext); return IF;}
+else    {handle("ELSE",yytext); return ELSE;}
+while   {handle("WHILE",yytext);return WHILE;}
+.       {printf("Error type A at Line %d: Mysterious characters \'%s\'\n",yylineno, yytext); error++} 
+%%
