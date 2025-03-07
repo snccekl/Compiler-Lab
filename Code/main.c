@@ -27,7 +27,7 @@ int main(int argc, char** argv) {
 Node* createNode(char* name,char * yytext){
 
 }
-//这个函数会接受多个参数，为 1(parent) + ChildNum(子节点数量)
+//这个函数会接受多个参数，为 1(ChildNUm) + 1(parent) + ChildNum(子节点数量)
 void addNode(int ChildNum, Node* parent, ...){
 
 }
