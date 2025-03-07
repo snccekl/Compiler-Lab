@@ -1,9 +1,9 @@
 %{
-    
+    #include "syntax.tab.h" 
     void handle_yytext(char* identification, char* yytext){
         yylval.node = createNode(identification,yytext);
     }
-    extern int error;//有多少错误
+    extern int error;
 %}
 
 %option yylineno
@@ -18,6 +18,27 @@ int     [1-9]{digit}*|0
 float   {digit}+\.{digit}+
 
 %%
+"//" {
+	char c = input();
+	while (c!= '\n'){
+		c = input();
+    }
+}
+
+"/*" {
+	char pre = input(), next = input();
+	while (next) {
+		if(pre == '*' && next == '/') {
+            break;
+        }
+        pre = next;
+        next = input();
+	}
+	if (!next) {
+		printf("Error type B at line %d: Illegal /*.\n", yylineno);
+		error++;
+	}
+}
 {ws}    {handle_yytext("ws",yytext);}
 {int}   {handle_yytext("INT",yytext); return INT;}
 {float} {handle_yytext("FLOAT",yytext); return FLOAT};
@@ -46,5 +67,7 @@ return  {handle("RETURN",yytext); return RETURN;}
 if      {handle("IF",yytext); return IF;}
 else    {handle("ELSE",yytext); return ELSE;}
 while   {handle("WHILE",yytext);return WHILE;}
+[0-9]*[.]|[.][0-9]* {printf("Error type A at Line %d: Illegal floating number \'%s\'.\n", yylineno, yytext);error++;return FLOAT;}
 .       {printf("Error type A at Line %d: Mysterious characters \'%s\'\n",yylineno, yytext); error++} 
+
 %%

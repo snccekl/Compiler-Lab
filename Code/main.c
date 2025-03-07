@@ -5,7 +5,7 @@ int yyrestart();
 int yyparse();
 int error = 0;
 Node * Root = NULL;
-extern void printTree();//这个函数在tree.c中定义？或者在这里定义？我不太确定
+extern void printTree();
 extern int yylineo;
 
 int main(int argc, char** argv) {
@@ -18,7 +18,18 @@ int main(int argc, char** argv) {
     yyrestart(f);
     yyparse();
     if(error == 0){
-        printTree();//可以考虑单独写个tree.c文件?也可以就在这里把树的结构写好？我不太确定，因此所有的头文件我都没有写
+        printTree();
     }
     return 0;
 }
+
+//API
+Node* createNode(char* name,char * yytext){
+
+}
+//这个函数会接受多个参数，为 1(parent) + ChildNum(子节点数量)
+void addNode(int ChildNum, Node* parent, ...){
+
+}
+
+void printTree()//是否需要参数由你决定
