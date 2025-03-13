@@ -9,8 +9,8 @@ struct Node{
     struct Node* first_son;
     struct Node* follow;
 };
-
-struct Node* createNode(char* name,char * yytext);
+typedef struct Node Node;
+Node* createNode(char* name,char * yytext);
 
 //这个函数会接受多个参数，为 1(ChildNUm) + 1(parent) + ChildNum(子节点数量)
 void addNode(struct Node* parent, int ChildNum, ...);

@@ -2,14 +2,14 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include "tree.h"
-
+extern int yylineno;
 //API
 struct Node* createNode(char* name,char * yytext){
     struct Node* node = malloc(sizeof(struct Node));
     
     node->name = name;
     node->token = yytext;
-    node->line = -1;
+    node->line = yylineno;
 
     node->parent = NULL;
     node->first_son = NULL;

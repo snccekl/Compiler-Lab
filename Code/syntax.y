@@ -4,7 +4,7 @@
     #include "tree.h"
     #include "lex.yy.c"
     extern int yylineno;
-    extern struct Node* Root;
+    extern Node* Root;
     extern int error;
 
     void yyerror(char const *msg){
