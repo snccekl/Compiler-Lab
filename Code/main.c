@@ -1,11 +1,24 @@
-#include<stdio.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include "tree.h"
 
 void perror(const char *__s);
 int yyrestart();
 int yyparse();
 int error = 0;
+
+
+// typedef struct TreeNode{
+//     char* name;
+//     char* token;
+//     int line;
+//     Node* parent;
+//     Node* first_son;
+//     Node* follow;
+// } Node;
+
 Node * Root = NULL;
-extern void printTree();
+// extern void printTree();
 extern int yylineo;
 
 int main(int argc, char** argv) {
@@ -18,18 +31,7 @@ int main(int argc, char** argv) {
     yyrestart(f);
     yyparse();
     if(error == 0){
-        printTree();
+        printTree(Root, 0);
     }
     return 0;
 }
-
-//API
-Node* createNode(char* name,char * yytext){
-
-}
-//这个函数会接受多个参数，为 1(ChildNUm) + 1(parent) + ChildNum(子节点数量)
-void addNode(int ChildNum, Node* parent, ...){
-
-}
-
-void printTree()//是否需要参数由你决定

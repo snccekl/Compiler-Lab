@@ -1,6 +1,7 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
+    #include "tree.h"
     #include "lex.yy.c"
     extern int yylineno;
     extern Node* Root;
@@ -14,7 +15,7 @@
 %}
 
 %union {
-    struct Node* node;
+    Node* node;
 }
 
 %token <node> INT FLOAT ID SEMI COMMA ASSIGNOP RELOP PLUS MINUS STAR DIV AND OR DOT NOT TYPE LP RP LB RB LC RC STRUCT RETURN IF ELSE WHILE
