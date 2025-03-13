@@ -3,8 +3,8 @@
 #include "tree.h"
 
 //API
-Node* createNode(char* name,char * yytext){
-    Node* node = malloc(sizeof(Node));
+struct Node* createNode(char* name,char * yytext){
+    struct Node* node = malloc(sizeof(struct Node));
     
     node->name = name;
     node->token = yytext;
@@ -15,13 +15,13 @@ Node* createNode(char* name,char * yytext){
     node->follow = NULL;
 }
 //这个函数会接受多个参数，为 1(ChildNUm) + 1(parent) + ChildNum(子节点数量)
-void addNode(int ChildNum, Node* parent, ...){
+void addNode(int ChildNum, struct Node* parent, ...){
     va_list childs;
     va_start(childs, ChildNum);
 
-    Node* prs = NULL;
+    struct Node* prs = NULL;
     for(int i = 0; i < ChildNum; i++) {
-        Node* child = va_arg(childs, Node*);
+        struct Node* child = va_arg(childs, struct Node*);
 
         child->parent = parent;
         if(parent->first_son == NULL) {
@@ -36,13 +36,13 @@ void addNode(int ChildNum, Node* parent, ...){
 }
 
 //是否需要参数由你决定
-void printTree(Node* prs, int floor) {
+void printTree(struct Node* prs, int floor) {
     for(int i = 0; i < floor; i++)
         printf("  ");
     
     printf("%s\n", prs->name);
     if(prs->first_son != NULL) {
-        Node* child = prs->first_son;
+        struct Node* child = prs->first_son;
         while(child != NULL) {
             printTree(child, floor + 1);
             child = child->follow;

@@ -4,7 +4,7 @@
     #include "tree.h"
     #include "lex.yy.c"
     extern int yylineno;
-    extern Node* Root;
+    extern struct Node* Root;
     extern int error;
 
     void yyerror(char const *msg){
@@ -15,7 +15,7 @@
 %}
 
 %union {
-    Node* node;
+    struct Node* node;
 }
 
 %token <node> INT FLOAT ID SEMI COMMA ASSIGNOP RELOP PLUS MINUS STAR DIV AND OR DOT NOT TYPE LP RP LB RB LC RC STRUCT RETURN IF ELSE WHILE
