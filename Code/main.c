@@ -17,7 +17,7 @@ int error = 0;
 //     Node* follow;
 // } Node;
 
-Node * Root = NULL;
+struct Node * Root = NULL;
 // extern void printTree();
 extern int yylineo;
 

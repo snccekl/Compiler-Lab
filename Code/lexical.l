@@ -42,8 +42,8 @@ float   {digit}+\.{digit}+
 }
 {ws}    {handle_yytext("ws",yytext);}
 {int}   {handle_yytext("INT",yytext); return INT;}
-{float} {handle_yytext("FLOAT",yytext); return FLOAT};
-{id}    {handle_yytext("ID",yytext); return ID};
+{float} {handle_yytext("FLOAT",yytext); return FLOAT;}
+{id}    {handle_yytext("ID",yytext); return ID;}
 ";"     {handle_yytext("SEMI",yytext); return SEMI;}
 ","     {handle_yytext("COMMA",yytext); return COMMA;}
 "="     {handle_yytext("ASSIGNOP",yytext); return ASSIGNOP;}
@@ -69,6 +69,6 @@ if      {handle_yytext("IF",yytext); return IF;}
 else    {handle_yytext("ELSE",yytext); return ELSE;}
 while   {handle_yytext("WHILE",yytext);return WHILE;}
 [0-9]*[.]|[.][0-9]* {printf("Error type A at Line %d: Illegal floating number \'%s\'.\n", yylineno, yytext);error++;return FLOAT;}
-.       {printf("Error type A at Line %d: Mysterious characters \'%s\'\n",yylineno, yytext); error++} 
+.       {printf("Error type A at Line %d: Mysterious characters \'%s\'\n",yylineno, yytext); error++;} 
 
 %%
