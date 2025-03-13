@@ -2,8 +2,8 @@
 #define TREE_H
 
 struct Node{
-    char* name;
-    char* token;
+    char name[256];
+    char token[256];
     int line;
     struct Node* parent;
     struct Node* first_son;
