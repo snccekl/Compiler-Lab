@@ -2,7 +2,7 @@
     #include "syntax.tab.h" 
 	#include "tree.h"
     void handle_yytext(char* identification, char* yytext){
-        yylval.node = createNode(identification,yytext);
+        yylval.node = createNode(0, identification,yytext);
     }
     extern int error;
 %}

@@ -5,11 +5,12 @@
 #include "tree.h"
 extern int yylineno;
 //API
-Node* createNode(char* name,char * yytext){
+Node* createNode(int type, char* name,char * yytext){
     Node* node = malloc(sizeof(Node));
     
     strcpy(node->name, name);
     strcpy(node->token, yytext);
+    node->type = type;
     node->line = yylineno;
 
     node->parent = NULL;
@@ -64,7 +65,26 @@ void printTree(Node* prs, int floor) {
     for(int i = 0; i < floor; i++)
         printf("  ");
     
-    printf("%s\n", prs->name);
+    printf("%s", prs->name);
+    if(prs->type == 1) {
+        printf(" (%d)", prs->line);
+    }
+    
+    else {
+        if(!strcmp(prs->name, "ID"))
+            printf(": %s", prs->token);
+        
+        else if(!strcmp(prs->name, "TYPE"))
+            printf(": %s", prs->token);
+
+        else if(!strcmp(prs->name, "INT"))
+            printf(": %d", atoi(prs->token));
+        
+        else if(!strcmp(prs->name, "FLOAT"))
+            printf(": %f", atof(prs->token));
+    }
+    
+    printf("\n");
     if(prs->first_son != NULL) {
         struct Node* child = prs->first_son;
         while(child != NULL) {
