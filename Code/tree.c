@@ -54,6 +54,8 @@ void addNode(Node* parent, int ChildNum, ...){
             prs = prs->follow;
         }
     }
+    parent->line = parent->first_son->line;
+    va_end(childs);
 }
 
 //是否需要参数由你决定

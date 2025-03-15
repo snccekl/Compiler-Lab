@@ -8,7 +8,7 @@
     extern int error;
 
     void yyerror(char const *msg){
-        if(strcmp(msg,"syntax error") <= 0){
+        if(strcmp(msg,"syntax error") == 0){
             printf("Error type B at Line %d: %s\n", yylineno,msg);
         }
     }
@@ -55,7 +55,7 @@ ExtDecList      : VarDec                        {$$ = createNode(1, "ExtDecList"
 
 
 Specifier       : TYPE                          {$$ = createNode(1, "Specifier","");addNode($$, 1, $1);}
-                | StructSpecifier               {$$ = createNode(1, "ExtDecList","");addNode($$, 1, $1);}
+                | StructSpecifier               {$$ = createNode(1, "Specifier","");addNode($$, 1, $1);}
                 ;
 
 StructSpecifier : STRUCT OptTag LC DefList RC   {$$ = createNode(1, "StructSpecifier","");addNode($$, 5, $1, $2, $3, $4, $5);}
