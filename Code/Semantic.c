@@ -113,6 +113,7 @@ FieldList search(char *name
                     if(flag != 2 && p->type->kind == STR_SPE){
                         return NULL;//与结构类型重名是不行的
                     }
+                    //应该是直接返回？
                     // if(flag == 1 && p->type->kind == FUNCTION)
                     // return p;
                     // if(flag == 0 && p->type->kind == BASIC)
