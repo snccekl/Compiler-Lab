@@ -58,6 +58,7 @@
   "C_Cpp_Runner.msvcSecureNoWarnings": false,
   "files.associations": {
     "stdarg.h": "c",
-    "typeinfo": "cpp"
-  }
+    "typeinfo": "cpp",
+    "semantic.h": "c"
+}
 }

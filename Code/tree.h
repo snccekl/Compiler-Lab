@@ -5,6 +5,7 @@ struct Node{
     char name[256];
     char token[256];
     int type, line;
+    int num_child;
     struct Node* parent;
     struct Node* first_son;
     struct Node* follow;

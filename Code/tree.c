@@ -7,7 +7,7 @@ extern int yylineno;
 //API
 Node* createNode(int type, char* name,char * yytext){
     Node* node = malloc(sizeof(Node));
-    
+    node->num_child = 0;
     strcpy(node->name, name);
     strcpy(node->token, yytext);
     node->type = type;
@@ -26,7 +26,7 @@ void addNode(Node* parent, int ChildNum, ...){
         printf("what???\n");
         return ;
     }
-    
+    parent->num_child = ChildNum;
     va_list childs;
     va_start(childs, ChildNum);
 
