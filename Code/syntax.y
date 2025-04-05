@@ -26,7 +26,7 @@
 %left RELOP
 %left PLUS MINUS 
 %left STAR DIV
-%right NOT
+%right NOT UMINUS
 %left LP RP LB RB DOT
 
 %nonassoc LOWER_THAN_ELSE
@@ -37,6 +37,7 @@
 %%
 
 Program         : ExtDefList                    {$$ = createNode(1, "Program",""); addNode($$, 1, $1); Root = $$;}
+                | error                         {error++;yyerror("error");}
                 ;
 
 ExtDefList      : ExtDef ExtDefList             {$$ = createNode(1, "ExtDefList",""); addNode($$, 2, $1, $2);}
@@ -51,6 +52,7 @@ ExtDef          : Specifier ExtDecList SEMI     {$$ = createNode(1, "ExtDef","")
 
 ExtDecList      : VarDec                        {$$ = createNode(1, "ExtDecList","");addNode($$, 1, $1);}
                 | VarDec COMMA ExtDecList       {$$ = createNode(1, "ExtDecList","");addNode($$, 3, $1, $2, $3);}
+                
                 ;
 
 
@@ -72,23 +74,25 @@ Tag             : ID                            {$$ = createNode(1, "Tag","");ad
 
 VarDec          : ID                            {$$ = createNode(1, "VarDec","");addNode($$, 1, $1);}    
                 | VarDec LB INT RB              {$$ = createNode(1, "VarDec","");addNode($$, 4, $1, $2, $3, $4);}
-                | VarDec LB error RB            {error++; yyerror("Missing \"]\".");}
+                | error                         {error++;yyerror("error");}
                 ;
 
 FunDec          : ID LP VarList RP              {$$ = createNode(1, "FunDec","");addNode($$, 4, $1, $2, $3, $4);}
                 | ID LP RP                      {$$ = createNode(1, "FunDec","");addNode($$, 3, $1, $2, $3);}
-                | ID LP error RP                {error++;yyerror("Syntax error.");}
+                | error                         {error++;yyerror("error");}
                 ;
             
 VarList         : ParamDec COMMA VarList        {$$ = createNode(1, "VarList","");addNode($$, 3, $1, $2, $3);}
-                | ParamDec                      {$$ = createNode(1, "VarList","");addNode($$, 1, $1);}   
+                | ParamDec                      {$$ = createNode(1, "VarList","");addNode($$, 1, $1);} 
+                | error                         {error++;yyerror("error");}  
                 ;
 
 ParamDec        : Specifier VarDec              {$$ = createNode(1, "ParamDec","");addNode($$, 2, $1, $2);}  
+                | error                         {error++;yyerror("error");}
                 ;
 
 CompSt          : LC DefList StmtList RC        {$$ = createNode(1, "CompSt","");addNode($$, 4, $1, $2, $3, $4);}
-                | LC error RC                   {error++;yyerror("CompSt error.");}
+                | error                         {error++;yyerror("error");}
                 ;
 
 StmtList        : Stmt StmtList                 {$$ = createNode(1, "StmtList","");addNode($$, 2, $1, $2);}  
@@ -110,18 +114,15 @@ DefList         : Def DefList                   {$$ = createNode(1, "DefList",""
                 ;
 
 Def             : Specifier DecList SEMI        {$$ = createNode(1, "Def","");addNode($$, 3, $1, $2, $3);}
-                | Specifier error SEMI          {error++;yyerror("Def error.");}
+                
                 ;
             
 DecList         : Dec                           {$$ = createNode(1, "DecList","");addNode($$, 1, $1);}
                 | Dec COMMA DecList             {$$ = createNode(1, "DecList","");addNode($$, 3, $1, $2, $3);}
-                | Dec error DecList             {error++;yyerror("DecList error.");}
-                | Dec error                     {error++;yyerror("DecList error.");}
                 ;
 
 Dec             : VarDec                        {$$ = createNode(1, "Dec","");addNode($$, 1, $1);}
                 | VarDec ASSIGNOP Exp           {$$ = createNode(1, "Dec","");addNode($$, 3, $1, $2, $3);}
-                | VarDec ASSIGNOP error         {error++;yyerror("Dec error.");} 
                 ;
 
 Exp             : Exp ASSIGNOP Exp              {$$=createNode(1, "Exp","");addNode($$, 3, $1, $2, $3);}
@@ -133,16 +134,16 @@ Exp             : Exp ASSIGNOP Exp              {$$=createNode(1, "Exp","");addN
                 | Exp STAR Exp                  {$$=createNode(1, "Exp","");addNode($$, 3, $1, $2, $3);}
                 | Exp DIV Exp                   {$$=createNode(1, "Exp","");addNode($$, 3, $1, $2, $3);}
                 | LP Exp RP                     {$$=createNode(1, "Exp","");addNode($$, 3, $1, $2, $3);}
-                | MINUS Exp                     {$$=createNode(1, "Exp","");addNode($$, 2, $1, $2);}
+                | MINUS Exp %prec UMINUS        {$$=createNode(1, "Exp","");addNode($$, 2, $1, $2);}
                 | NOT Exp                       {$$=createNode(1, "Exp","");addNode($$, 2, $1, $2);}
                 | ID LP Args RP                 {$$=createNode(1, "Exp","");addNode($$, 4, $1, $2, $3, $4);}
                 | ID LP RP                      {$$=createNode(1, "Exp","");addNode($$, 3, $1, $2, $3);}
                 | Exp LB Exp RB                 {$$=createNode(1, "Exp","");addNode($$, 4, $1, $2, $3, $4);}
-                | Exp LB error RB               {error++;yyerror("Missing \"]\".");}
                 | Exp DOT ID                    {$$=createNode(1, "Exp","");addNode($$, 3, $1, $2, $3);}
                 | ID                            {$$=createNode(1, "Exp","");addNode($$, 1, $1);}
                 | INT                           {$$=createNode(1, "Exp","");addNode($$, 1, $1);}
                 | FLOAT                         {$$=createNode(1, "Exp","");addNode($$, 1, $1);}
+                | error                         {error++;yyerror("error");}
                 ;
     
 Args            : Exp COMMA Args                {$$=createNode(1, "Args","");addNode($$, 3, $1, $2, $3);}
