@@ -52,7 +52,6 @@ ExtDef          : Specifier ExtDecList SEMI     {$$ = createNode(1, "ExtDef","")
 
 ExtDecList      : VarDec                        {$$ = createNode(1, "ExtDecList","");addNode($$, 1, $1);}
                 | VarDec COMMA ExtDecList       {$$ = createNode(1, "ExtDecList","");addNode($$, 3, $1, $2, $3);}
-                
                 ;
 
 

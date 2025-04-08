@@ -88,3 +88,5 @@ Type Exp(Node *root);
 void Def(Node *node);
 void DecList(Node *node,Type spec);
 void Dec(Node *node,Type spec);
+
+void check_declar();
