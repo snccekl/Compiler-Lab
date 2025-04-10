@@ -98,14 +98,13 @@ FieldList ParamDec(Node* node);
 FieldList VarDec(Node *type,Type spec);
 Type StructSpecifier(Node *node);
 void OptTag(Node *node,Type spec);
-void DefList(Node *node);
 void Stmt(Node *node,Type ftype);
 Type Exp(Node *root);
 FieldList Args(Node *node);
 void DefList(Node *node);
 void Def(Node *node);
-void DecList(Node *node,Type spec);
-void Dec(Node *node,Type spec);
+void DecList(Node *node,Type spec, int state);
+void Dec(Node *node,Type spec, int state);
 
 void check_declar();
 

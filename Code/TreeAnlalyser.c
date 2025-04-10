@@ -440,28 +440,28 @@ void Def(Node *node) {
     Type spec = Specifier(node->first_son);
 
     Node* decList = node->first_son->follow;
-    DecList(decList, spec);
+    DecList(decList, spec, DEFIN);
 }
 
 // DecList         : Dec              
 //                 | Dec COMMA DecList 
-void DecList(Node *node,Type spec) {
+void DecList(Node *node, Type spec, int state) {
     Node* dec = node->first_son;
 
-    Dec(dec, spec);
+    Dec(dec, spec, state);
     if(dec->follow != NULL) {
         Node* decList = dec->follow->follow;
-        DecList(decList, spec);
+        DecList(decList, spec, state);
     }
 }
 
 // Dec             : VarDec             
 //                 | VarDec ASSIGNOP Exp
-void Dec(Node *node,Type spec) {
+void Dec(Node *node, Type spec, int state) {
     Node* var = node->first_son;
     FieldList varField = VarDec(var, spec);
 
-
+    
 }
 
 // Exp             : Exp ASSIGNOP Exp      
