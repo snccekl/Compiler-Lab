@@ -16,11 +16,6 @@
 typedef struct Type_ *Type;
 typedef struct FieldList_ *FieldList;
 
-extern FieldList hashTable[HASH_SIZE];
-extern int scope_id = 0;
-extern int current_id = 0;
-extern scope sc_table[50];
-
 typedef struct Type_ {
 	enum {BASIC, ARRAY, STRUCTURE, FUNCTION,STR_SPE} kind;//结构类型和结构定义不是一个东西
     union{
@@ -63,6 +58,13 @@ typedef struct FieldList_ {
 	FieldList tail;//下一个域
 	int scope_id;//作用域
 }FieldList_;
+
+
+extern FieldList hashTable[HASH_SIZE];
+extern int scope_id = 0;
+extern int current_id = 0;
+extern scope sc_table[50];
+
 
 void enter_scope();
 void exit_scope();
