@@ -1,3 +1,6 @@
+#ifndef SEMANTIC_H
+#define SEMANTIC_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -56,6 +59,13 @@ typedef struct FieldList_ {
 	int scope_id;//作用域
 }FieldList_;
 
+
+extern FieldList hashTable[HASH_SIZE];
+extern int scope_id = 0;
+extern int current_id = 0;
+extern scope sc_table[50];
+
+
 void enter_scope();
 void exit_scope();
 
@@ -70,6 +80,10 @@ FieldList ifexist(char *name,int id);
 int TypeEqual(Type type1,Type type2);
 //debug用
 void printSymbol();
+// 判断当前是否在struct里面
+int inStruct() {
+
+}
 
 //树
 void Program(Node *root);
@@ -79,14 +93,20 @@ Type Specifier(Node *node);
 void ExtDecList(Node *node,Type spec);
 void FunDec(Node *node,Type spec,int state);
 void CompSt(Node *node,Type ftype);
+FieldList VarList(Node* node);
+FieldList ParamDec(Node* node);
 FieldList VarDec(Node *type,Type spec);
 Type StructSpecifier(Node *node);
 void OptTag(Node *node,Type spec);
 void DefList(Node *node);
 void Stmt(Node *node,Type ftype);
 Type Exp(Node *root);
+FieldList Args(Node *node);
+void DefList(Node *node);
 void Def(Node *node);
 void DecList(Node *node,Type spec);
 void Dec(Node *node,Type spec);
 
 void check_declar();
+
+#endif
