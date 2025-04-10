@@ -23,7 +23,6 @@ int main(int argc, char** argv) {
     if(error == 0){
         initHashtable();
         Program(Root);
-        check_declar();
     }
     return 0;
 }

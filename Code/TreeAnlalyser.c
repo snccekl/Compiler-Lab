@@ -91,10 +91,6 @@ void ExtDef(Node *node){
     Type specifier = Specifier(node->first_son);
 
     //Specifier ExtDecList SEMI  
-    /*
-    如果把孩子节点弄成数组表述，fist_son == child[0]first_son->follow == child[1]?
-    如果是，那不需要提醒我更改，否则请更改，谢谢。
-    */
     if(strcmp(node->first_son->follow->name,"ExtDecList") == 0){
         ExtDecList(node->first_son->follow,specifier);
     }
@@ -110,10 +106,9 @@ void ExtDef(Node *node){
             FunDec(node->first_son->follow,specifier,DEFIN);
             CompSt(node->first_son->follow,specifier);
         }
-        //不做声明任务(3.1),故直接报错
+        //不做声明任务(3.1),故认为是定义
         else{
-            printf("Error type B at Line 6: Incomplete definition of function");
-            //FunDec(node->first_son->follow,specifier,DECLA);
+            FunDec(node->first_son->follow,specifier,DEFIN);
         }
         exit_scope();
     }
@@ -150,7 +145,7 @@ Type Specifier(Node *node){
     }
     // StructSpecifier
     else{
-        //printf("goto StructSpecifier:line %d \n",node->child[0]->lineno);
+        //printf("goto StructSpecifier:line %d \n",node->first_son->lineno);
         Type t = StructSpecifier(node->first_son);
         Type t2 = (Type)malloc(sizeof(Type_));
         t2->kind =STRUCTURE;
@@ -296,9 +291,9 @@ FieldList VarDec(Node *type,Type spec) {
         Node* size_node = first->follow->follow;
         int size = atoi(size_node->name);
 
-        if(size == 0) {
-            CrushError(12, type);
-        }
+        // if(size == 0) {
+        //     CrushError(12, type);
+        // }
 
         Type array_type = (Type)malloc(sizeof(Type_));
         array_type->kind = ARRAY;
@@ -342,15 +337,19 @@ int GetParamNum(FieldList args) {
 //                 | ID LP RP              
 void FunDec(Node *node,Type spec,int state) {
     Node* id_node = node->first_son;
-    char* func_name = id_node->name;
-    
+    char* func_name = id_node->token;
+
+    FieldList func = (FieldList)malloc(sizeof(FieldList_));
+    func->name = strdup(func_name);
+    func->type = (Type)malloc(sizeof(Type_));
+    func->scope_id = sc_table[current_id].parent_id;
+
     FieldList args = NULL;
     if(id_node->follow != NULL && strcmp(id_node->follow->follow->name, "VarList") == 0) {
         args = VarList(id_node->follow->follow);
     }
 
-
-    FieldList existence = ifexist(func_name, current_id);
+    FieldList existence = ifexist(func_name, func->scope_id);
     if(existence != NULL) {
         if(existence->type->kind != FUNCTION) {
             CrushError(4, node);
@@ -364,9 +363,6 @@ void FunDec(Node *node,Type spec,int state) {
         return ;
     }
 
-    FieldList func = (FieldList)malloc(sizeof(FieldList_));
-    func->name = strdup(func_name);
-    func->type = (Type)malloc(sizeof(Type_));
     func->type->kind = FUNCTION;
     func->type->u.function.funcType = spec;  // 函数返回类型
     func->type->u.function.params = args;  // 解析参数列表
@@ -409,7 +405,7 @@ FieldList ParamDec(Node* node) {
 }
 
 
-// CompSt          : LC DefList StmtList RC                
+// CompSt          : LC DefList Stmt RC                
 void CompSt(Node *node,Type ftype) {
     enter_scope();
 
@@ -417,9 +413,47 @@ void CompSt(Node *node,Type ftype) {
     Node* stmtList = defList->follow;
 
     DefList(defList);
-    StmtList(stmtList);
+    Node * stmtlist =node->first_son->follow->follow;
+    while(stmtlist!=NULL)
+    {
+        Stmt(stmtlist->first_son,ftype);
+        stmtlist = stmtlist->first_son->follow;
+    }
 
     exit_scope();
+}
+
+// Stmt    : Exp SEMI                                
+//         | CompSt                                  
+//         | RETURN Exp SEMI                         
+//         | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE 
+//         | IF LP Exp RP Stmt ELSE Stmt                        
+//         | WHILE LP Exp RP Stmt                    
+//         ;  
+void Stmt(Node *node,Type ftype) {
+    if (strcmp(node->first_son->name, "CompSt") == 0){
+        CompSt(node->first_son,ftype);
+    }
+    else if (strcmp(node->first_son->name, "Exp") == 0){//Exp SEMI 
+        Exp(node->first_son);
+    }
+    else if (strcmp(node->first_son->name, "RETURN") == 0){
+        Type rtype = Exp(node->first_son->follow);
+        if(TypeEqual(ftype,rtype)== 0){
+            if(rtype != NULL)//可能有问题
+                printf("Error type 8 at Line %d: Type mismatched for return.\n", node->line);
+        }
+    }
+    //仅有int型变量才能进行逻辑运算或者作为if和while语句的条件；
+    else{
+        //WHILE LP Exp RP Stmt 
+        //IF LP Exp RP Stmt
+        Exp(node->first_son->follow->follow);
+        Stmt(node->first_son->follow->follow->follow->follow,ftype);
+        //IF LP Exp RP Stmt ELSE Stmt 
+        if(node->num_child ==7)
+            Stmt(node->first_son->follow->follow->follow->follow->follow->follow,ftype);
+    }
 }
 
 // DefList         : Def DefList
@@ -458,10 +492,26 @@ void DecList(Node *node,Type spec) {
 // Dec             : VarDec             
 //                 | VarDec ASSIGNOP Exp
 void Dec(Node *node,Type spec) {
+    if(node == NULL) return;
     Node* var = node->first_son;
     FieldList varField = VarDec(var, spec);
+    if(node->num_child == 3){
+        // 如果在struct内部 则要报错 但我已经考虑了这种情况
+        // 故而必然不在struct内部
+        // 考虑类型匹配
+        // 这里的类型匹配考虑的是初始化的时候
 
-
+        Type right = Exp(node->first_son->follow->follow);
+        if(TypeEqual(varField->type,right) == 0){
+			printf("Error type 5 at Line %d: mismatch in assignment.\n",node->line);
+        }
+    }
+    if(ifexist(varField->name,varField->scope_id)!=NULL){
+        printf("Error type 3 at Line %d: Redefined variable %s.\n", node->line, varField->name);
+    }
+    else{
+        insert(varField);
+    }
 }
 
 // Exp             : Exp ASSIGNOP Exp      
@@ -482,7 +532,212 @@ void Dec(Node *node,Type spec) {
 //                 | ID                    
 //                 | INT                   
 //                 | FLOAT
-Type Exp(Node *root);
+Type Exp(Node *node){
+    if(node == NULL) return NULL;
+    if (node->num_child ==3 && strcmp(node->first_son->follow->name, "ASSIGNOP") == 0){   
+        Node * exp1 = node->first_son;
+        Node * exp2 = node->first_son->follow->follow;
+        //赋值号左边出现一个只有右值的表达式。
+        //ID | Exp DOT ID  |  Exp LB Exp RB
+        if(exp1->num_child == 1 && !(strcmp(exp1->first_son->name, "ID") == 0) ){
+            printf("Error type 6 at Line %d: The left-hand side of an assignment must be a right variable.\n", exp1->line);
+        }
+        if(exp1->num_child == 3 && !(strcmp(exp1->first_son->follow->name, "DOT") == 0) ){
+            printf("Error type 6 at Line %d: The left-hand side of an assignment must be a right variable.\n", exp1->line);
+        }
+        if(exp1->num_child == 4 && !(strcmp(exp1->first_son->follow->name, "LB") == 0) ){
+            printf("Error type 6 at Line %d: The left-hand side of an assignment must be a right variable.\n", exp1->line);
+        }
+        //赋值号两边的表达式类型不匹配。
+        Type t1 = Exp(exp1);
+        Type t2 = Exp(exp2);
+        if(TypeEqual(t1,t2) == 0){
+            //防止重复报错
+            if(t1!=NULL && t2!=NULL)
+			printf("Error type 5 at Line %d: mismatch in assignment\n",node->line);
+            return NULL;
+        }
+        else{
+            return t1;
+        }
+    }
+    //Exp AND|OR|RELOP Exp
+    if (node->num_child ==3 &&
+       ( strcmp(node->first_son->follow->name, "AND") == 0 | strcmp(node->first_son->follow->name, "OR") == 0 
+       |strcmp(node->first_son->follow->name, "RELOP") == 0 ))
+    {
+// 操作数类型不匹配或操作数类型与操作符不匹配（例如整型变量与数组变
+// 量相加减，或数组（或结构体）变量与数组（或结构体）变量相加减）。
+        Node * exp1 = node->first_son;
+        Node * exp2 = node->first_son->follow->follow;
+        Type t1 = Exp(exp1);
+        Type t2 = Exp(exp2);
+        if(TypeEqual(t1,t2) == 0){
+            if(t1!=NULL) //todo:可能有问题
+			printf("Error type 7 at Line %d: mismatch in operands\n",node->line);
+            return NULL;
+        }
+        else {
+            Type t = (Type)malloc(sizeof(Type_));
+            t ->kind =BASIC;
+            t->u.basic=INT_TYPE;
+            return t;
+        }
+    }
+    // +-*/
+    if (node->num_child ==3 &&(
+(strcmp(node->first_son->follow->name, "PLUS") == 0) || (strcmp(node->first_son->follow->name, "MINUS") == 0) || (strcmp(node->first_son->follow->name, "STAR") == 0) || (strcmp(node->first_son->follow->name, "DIV") == 0))
+    )
+    {
+        Node * exp1 = node->first_son;
+        Node * exp2 = node->first_son->follow->follow;
+        Type t1 = Exp(exp1);
+        Type t2 = Exp(exp2);
+        if (TypeEqual(t1, t2) == 0){
+            printf("Error type 7 at Line %d: mismatch in operands.\n", node->line);
+            return NULL;
+        }
+        else{
+            return t1;
+        }
+    }
+    //         | LP Exp RP         (a)
+    //         | MINUS Exp         -a
+    //         | NOT Exp           ~a
+    if ((strcmp(node->first_son->name, "LP") == 0) || (strcmp(node->first_son->name, "MINUS") == 0) || (strcmp(node->first_son->name, "NOT") == 0) )
+    {
+        Node * exp1 = node->first_son->follow;
+        Type t1 = Exp(exp1);
+        return t1;
+    }
 
-// Args            : Exp COMMA Args
-//                 | Exp           
+//         | ID                a     左值
+//         | INT               1
+//         | FLOAT             1.0
+    if(node->num_child == 1 && (strcmp(node->first_son->name, "ID") == 0) ){
+        //ID
+        //找变量
+        FieldList field = search(node->first_son->token,0);
+        if(field == NULL){
+            printf("Error type 1 at Line %d: Undefined variable %s.\n",node->line, node->first_son->token);
+            return NULL;
+        }
+        return field->type;
+    }
+    if(strcmp(node->first_son->name, "INT") == 0){
+        Type t = (Type) malloc (sizeof(Type_));
+        t->kind = BASIC;
+        t->u.basic = INT_TYPE;
+        return t;
+    }
+    if(strcmp(node->first_son->name, "FLOAT") == 0){
+        Type t = (Type) malloc (sizeof(Type_));
+        t->kind = BASIC;
+        t->u.basic = FLOAT_TYPE;
+        return t;
+    }
+
+
+    if(strcmp(node->first_son->name, "ID") == 0){
+//         | ID LP Args RP     a(b)
+//         | ID LP RP          a()
+        //找函数名
+        FieldList field = search(node->first_son->token,1);
+        if(field == NULL){
+            printf("Error type 2 at Line %d: Undefined function %s.\n", node->line, node->first_son->token);
+            return NULL;
+        }
+        if(field->type->kind!= FUNCTION){
+            printf("Error type 11 at Line %d: %s is not a function.\n", node->first_son->line, field->name);
+            return NULL;
+        }
+        Type rtype = field->type;
+        
+        //类型9 实参与形参匹配
+        Type t = (Type)malloc(sizeof(Type_));
+        t->kind = FUNCTION;
+        t->u.function.paramNum =0;
+        t->u.function.params = NULL;
+        if(strcmp(node->first_son->follow->follow->name, "Args") == 0){
+        //     Args    : Exp COMMA Args  
+                    // | Exp             
+                    // ;
+            //填充type 跟前面struct类似
+            Node * args = node->first_son->follow->follow;
+            while(1){
+                Type p = Exp(args->first_son);
+                FieldList fp = (FieldList)malloc(sizeof(FieldList_));
+                fp->scope_id = current_id;
+                fp->name = "temp";
+                fp->type = p;
+                t->u.function.paramNum++;
+                fp->tail = t->u.function.params;
+                t->u.function.params = fp;
+
+                if(args->num_child == 3){
+                    args= args->first_son->follow->follow;
+                }
+                else{
+                    break;
+                }
+            }
+        }
+        t->u.function.funcType= rtype->u.function.funcType;
+        if(TypeEqual(t,rtype) == 0){
+            if(!(t->u.function.paramNum==0 && rtype->u.function.paramNum==0)){
+                printf("Error type 9 at Line %d: Params wrong in function %s.\n", node->line, node->first_son->token);
+                t->u.function.funcType=NULL;
+                return NULL;
+            }
+            else{
+                return rtype->u.function.funcType;
+            }
+        }
+        else{
+          return rtype->u.function.funcType;
+        }
+    }
+//         | Exp LB Exp RB     a[b]  左值
+    if ( node->num_child ==4 &&
+        ( strcmp(node->first_son->follow->name, "LB") == 0))
+    {
+        //Exp LB Exp RB 
+        Node * exp1 = node->first_son;
+       
+        Type t1 = Exp(exp1);
+        if(t1 == NULL) //说明前面a不存在
+        {return NULL;}
+        //对非数组型变量使用“[…]”（数组访问）操作符。
+        if(t1->kind != ARRAY){
+            printf("Error type 10 at Line %d: %s is not an array.\n", node->line, exp1->first_son->token);
+            return NULL;
+        }
+        Type t2 = Exp(node->first_son->follow->follow);
+        if( !(t2->kind ==BASIC && t2->u.basic == INT_TYPE)){
+            printf("Error type 12 at Line %d: there is not an integer in [" "].\n", node->line);
+            return NULL;
+        }
+        return t1->u.array.elem;
+    }
+
+    //         | Exp DOT ID        a.b   左值
+    if (node->num_child ==3 &&(strcmp(node->first_son->follow->name, "DOT") == 0)){
+        Node * exp1 = node->first_son;
+        Type t1 = Exp(exp1);
+        if(t1->kind != STRUCTURE){
+            //或许todo : 看这个变量是否被定义
+            printf("Error type 13 at Line %d: %s is not a struct.\n", node->line,exp1->first_son->token);
+            return NULL;
+        }
+        FieldList p = t1->u.structure;
+        char * str = node->first_son->follow->follow->token; 
+        while(p!=NULL){
+            if(strcmp(p->name,str) == 0)
+            return p->type;
+            p=p->tail;
+        }
+        printf("Error type 14 at Line %d: Non-existent field %s.\n", node->line, node->first_son->follow->follow->token);
+        return NULL;
+    }
+    return NULL;
+}

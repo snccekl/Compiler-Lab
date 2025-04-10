@@ -16,6 +16,11 @@
 typedef struct Type_ *Type;
 typedef struct FieldList_ *FieldList;
 
+extern FieldList hashTable[HASH_SIZE];
+extern int scope_id = 0;
+extern int current_id = 0;
+extern scope sc_table[50];
+
 typedef struct Type_ {
 	enum {BASIC, ARRAY, STRUCTURE, FUNCTION,STR_SPE} kind;//结构类型和结构定义不是一个东西
     union{
@@ -59,13 +64,6 @@ typedef struct FieldList_ {
 	int scope_id;//作用域
 }FieldList_;
 
-
-extern FieldList hashTable[HASH_SIZE];
-extern int scope_id = 0;
-extern int current_id = 0;
-extern scope sc_table[50];
-
-
 void enter_scope();
 void exit_scope();
 
@@ -81,9 +79,6 @@ int TypeEqual(Type type1,Type type2);
 //debug用
 void printSymbol();
 // 判断当前是否在struct里面
-int inStruct() {
-
-}
 
 //树
 void Program(Node *root);
@@ -101,12 +96,11 @@ void OptTag(Node *node,Type spec);
 void DefList(Node *node);
 void Stmt(Node *node,Type ftype);
 Type Exp(Node *root);
-FieldList Args(Node *node);
 void DefList(Node *node);
 void Def(Node *node);
 void DecList(Node *node,Type spec);
 void Dec(Node *node,Type spec);
 
-void check_declar();
+//void check_declar();
 
 #endif

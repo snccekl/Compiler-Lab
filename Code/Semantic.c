@@ -1,9 +1,9 @@
 #include "Semantic.h" 
 
-FieldList hashTable[HASH_SIZE];
-int scope_id = 0;
-int current_id = 0;
-scope sc_table[50];
+// FieldList hashTable[HASH_SIZE];
+// int scope_id = 0;
+// int current_id = 0;
+// scope sc_table[50];
 
 //散列函数
 //代码第7行的常数（0x3fff）确定了符号表的大小（即16384）
@@ -189,11 +189,5 @@ int TypeEqual(Type t1,Type t2){
         return 1;
     }
     printf("debug\n");
-    return 0;
-}
-
-int InStruct() {
-    // TODO: 判断当前scope是否在struct里，参数可能得自行调整
-    
     return 0;
 }

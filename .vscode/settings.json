@@ -59,6 +59,7 @@
   "files.associations": {
     "stdarg.h": "c",
     "typeinfo": "cpp",
-    "semantic.h": "c"
+    "semantic.h": "c",
+    "stdio.h": "c"
 }
 }
