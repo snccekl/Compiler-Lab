@@ -61,8 +61,8 @@ typedef struct FieldList_ {
 
 
 extern FieldList hashTable[HASH_SIZE];
-extern int scope_id = 0;
-extern int current_id = 0;
+extern int scope_id;
+extern int current_id;
 extern scope sc_table[50];
 
 
@@ -80,10 +80,6 @@ FieldList ifexist(char *name,int id);
 int TypeEqual(Type type1,Type type2);
 //debug用
 void printSymbol();
-// 判断当前是否在struct里面
-int inStruct() {
-
-}
 
 //树
 void Program(Node *root);
@@ -100,12 +96,9 @@ Type StructSpecifier(Node *node);
 void OptTag(Node *node,Type spec);
 void Stmt(Node *node,Type ftype);
 Type Exp(Node *root);
-FieldList Args(Node *node);
 void DefList(Node *node);
 void Def(Node *node);
-void DecList(Node *node,Type spec, int state);
-void Dec(Node *node,Type spec, int state);
-
-void check_declar();
+void DecList(Node *node,Type spec);
+void Dec(Node *node,Type spec);
 
 #endif
