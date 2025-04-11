@@ -4,7 +4,7 @@ int max(int x,int y)
     if (x > y)
         t = x;
     else
-        t = y
+        t = y;
     return t;
 }
 int main()
