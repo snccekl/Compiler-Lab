@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
     if(error == 0){
         // printTree(Root, 0);
         initHashtable();
-        // printf("\nStart anlalyz\n");
+        // printf("\nStart analyze\n");
         Program(Root);
     }
     return 0;
