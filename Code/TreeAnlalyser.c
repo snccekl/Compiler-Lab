@@ -407,7 +407,7 @@ void FunDec(Node *node,Type spec,int state) {
             printf("Error type 4 at Line %d: Redefined function \"%s\"\n", node->line, node->first_son->token);
         }
         else if(!args_matched(existence->type->u.function.params, args)) {
-            CrushError(9, node);
+            printf("Error type 9 at Line %d: Params wrong in function %s.\n", node->line, node->first_son->token);
         }
         return ;
     }
@@ -449,8 +449,8 @@ FieldList ParamDec(Node* node) {
 
     // 检查参数名是否重复
     if (ifexist(var->name, current_id) != NULL) {
-        // printf("Error type 3 at Line %d: Redefined parameter %s.\n", node->line, var->name);
-        CrushError(3, node);
+        printf("Error type 3 at Line %d: Redefined parameter %s.\n", node->line, var->name);
+        // CrushError(3, node);
     } else {
         insert(var);  // 参数插入当前作用域（函数作用域）
     }
@@ -658,8 +658,9 @@ Type Exp(Node *node){
         Node * exp2 = node->first_son->follow->follow;
         Type t1 = Exp(exp1);
         Type t2 = Exp(exp2);
+        
         if(TypeEqual(t1,t2) == 0){
-            if(t1!=NULL) //todo:可能有问题
+            if(t1 != NULL && t2 != NULL) //todo:可能有问题
 			    printf("Error type 7 at Line %d: mismatch in operands\n",node->line);
             return NULL;
         }
@@ -749,50 +750,25 @@ Type Exp(Node *node){
         t->u.function.paramNum =0;
         t->u.function.params = NULL;
         if(strcmp(node->first_son->follow->follow->name, "Args") == 0){
-        //     Args    : Exp COMMA Args  
-                    // | Exp             
-                    // ;
-            //填充type 跟前面struct类似
             Node * args = node->first_son->follow->follow;
-            while(1){
-                debuger("Argsm", node);
-                Type p = Exp(args->first_son);
-                FieldList fp = (FieldList)malloc(sizeof(FieldList_));
-                
-                fp->scope_id = current_id;
-                fp->name = strdup("temp");
-                fp->type = p;
-                t->u.function.paramNum++;
-                fp->tail = t->u.function.params;
-                t->u.function.params = fp;
-
-                if(args->num_child == 3){
-                    // printf("waht\n");
-                    args = args->first_son->follow->follow;
-                    
-                }
-                else{
-                    break;
-                }
-            }
+            FieldList argsField = Args(args);
+            t->u.function.params = argsField;
+            t->u.function.paramNum = GetParamNum(argsField);
         }
 
         
         t->u.function.funcType= rtype->u.function.funcType;
+        
+        // printf("waht????????????????????????????????????\n");
         if(TypeEqual(t,rtype) == 0){
+            // printf("args_num_1: %d args_num_1: %d\n", t->u.function.paramNum, rtype->u.function.paramNum);
             
             if(!(t->u.function.paramNum==0 && rtype->u.function.paramNum==0)){
                 printf("Error type 9 at Line %d: Params wrong in function %s.\n", node->line, node->first_son->token);
                 t->u.function.funcType=NULL;
-                return NULL;
-            }
-            else{
-                return rtype->u.function.funcType;
             }
         }
-        else{
-            return rtype->u.function.funcType;
-        }
+        return rtype->u.function.funcType;
     }
 //         | Exp LB Exp RB     a[b]  左值
     if ( node->num_child ==4 &&
@@ -837,11 +813,34 @@ Type Exp(Node *node){
         char * str = node->first_son->follow->follow->token; 
         while(p!=NULL){
             if(strcmp(p->name,str) == 0)
-            return p->type;
+                return p->type;
             p=p->tail;
         }
         printf("Error type 14 at Line %d: Non-existent field %s.\n", node->line, node->first_son->follow->follow->token);
         return NULL;
     }
     return NULL;
+}
+
+
+// Args    : Exp COMMA Args  
+//         | Exp             
+//         ;
+//填充type 跟前面struct类似
+FieldList Args(Node* node) {
+    debuger("Args", node);
+
+    FieldList field = (FieldList)malloc(sizeof(FieldList_));
+    Node* exp = node->first_son;
+    
+    field->name = strdup("tmp");
+    field->type = Exp(exp);
+    field->scope_id = current_id;
+    field->tail = NULL;
+
+    if(node->num_child == 3) {
+        field->tail = Args(exp->follow->follow);
+    }
+
+    return field;
 }

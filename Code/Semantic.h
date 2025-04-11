@@ -103,5 +103,6 @@ void DefList(Node *node);
 void Def(Node *node);
 void DecList(Node *node,Type spec);
 void Dec(Node *node,Type spec);
+FieldList Args(Node* node);
 
 #endif

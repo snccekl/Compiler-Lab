@@ -161,9 +161,11 @@ void printSymbol(){
 }
 
 int TypeEqual(Type t1,Type t2){
-    
+	if((t1==NULL)||(t2==NULL)) {
+        return 0;
+    }
 
-	if((t1==NULL)||(t2==NULL)) return 0;
+    // printf("geted type: %d needed: %d\n", t1->kind, t2->kind);
 
 	if(t1->kind != t2->kind) return 0;
     if(t1->kind == BASIC){
@@ -173,8 +175,11 @@ int TypeEqual(Type t1,Type t2){
         return (TypeEqual(t1->u.array.elem,t2->u.array.elem));
     }
     if(t1->kind == STRUCTURE || t1->kind == STR_SPE){
+        
         FieldList p1 = t1->u.structure;
         FieldList p2 = t2->u.structure;
+        if(p1 == NULL || p2 == NULL)
+            return 0;
         return strcmp(p1->name,p2->name) == 0;
         
     }
@@ -187,9 +192,13 @@ int TypeEqual(Type t1,Type t2){
         FieldList p2 = t2->u.function.params;
         for(int i = 0; i<t1->u.function.paramNum;i++)
         {
-            if(TypeEqual(p1->type,p2->type) == 0) return 0;
+            if(TypeEqual(p1->type,p2->type) == 0) {
+                return 0;
+            }
             p1 = p1->tail; p2 = p2->tail;
+            
         }
+        
         return 1;
     }
     printf("debug\n");
