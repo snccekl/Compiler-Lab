@@ -73,7 +73,7 @@ char* strdup(const char* s) {
 
 //Program     : ExtDefList
 void Program(Node *root){
-    printf("Program %s %s %d\n", root->name, root->token, root->line);
+    // printf("Program %s %s %d\n", root->name, root->token, root->line);
     if(root==NULL){
         return;
     }
@@ -90,11 +90,11 @@ void ExtDefList(Node *node){
     if(node == NULL){
         return;
     }
-    printf("ExtDefList %s %s %d\n", node->name, node->token, node->line);
-    if(node->num_child == 2){
-        ExtDef(node->first_son);
-        ExtDefList(node->first_son->follow);
-    }
+    // printf("ExtDefList %s %s %d\n", node->name, node->token, node->line);
+    
+    Node* extDef = node->first_son;
+    ExtDef(node->first_son);  
+    ExtDefList(node->first_son->follow);
 }
 
 // ExtDef      : Specifier ExtDecList SEMI  
@@ -102,7 +102,7 @@ void ExtDefList(Node *node){
 //             | Specifier FunDec CompSt   
 //             | Specifier FunDec SEMI  
 void ExtDef(Node *node){
-    printf("ExtDef %s %s %d\n", node->name, node->token, node->line);
+    // printf("ExtDef %s %s %d\n", node->name, node->token, node->line);
     //先确定返回值
     Type specifier = Specifier(node->first_son);
 
@@ -135,7 +135,7 @@ void ExtDef(Node *node){
 //             | VarDec COMMA ExtDecList 
 //             ;
 void ExtDecList(Node * node,Type spec){
-    printf("ExtDecList %s %s %d\n", node->name, node->token, node->line);
+    // printf("ExtDecList %s %s %d\n", node->name, node->token, node->line);
     FieldList field = VarDec(node->first_son,spec);
     if(ifexist(field->name,field->scope_id) != NULL)
         printf("Error type 3 at Line %d: Redefined variable %s.\n",node->first_son->line,field->name);
@@ -152,7 +152,7 @@ void ExtDecList(Node * node,Type spec){
 //             ;
 Type Specifier(Node *node){
     // TYPE
-    printf("Specifier %s %s %d\n", node->name, node->token, node->line);
+    // printf("Specifier %s %s %d\n", node->name, node->token, node->line);
     if(strcmp(node->first_son->name,"TYPE")==0){
         Type spec = (Type)malloc(sizeof(Type_));
         spec->kind = BASIC;
@@ -178,7 +178,7 @@ Type Specifier(Node *node){
 //                 ;
 Type StructSpecifier(Node *node)
 {
-    printf("StructSpecifier %s %s %d\n", node->name, node->token, node->line);
+    // printf("StructSpecifier %s %s %d\n", node->name, node->token, node->line);
     Type spec = (Type)malloc(sizeof(Type_));
     spec->kind = STRUCTURE;
     //这里注意 如果opttag为空就会是NULL 会出错
@@ -274,7 +274,7 @@ Type StructSpecifier(Node *node)
 //         | /* empty */ 
 //         ;
 void OptTag(Node *node,Type spec){
-    printf("OptTag %s %s %d\n", node->name, node->token, node->line);
+    // printf("OptTag %s %s %d\n", node->name, node->token, node->line);
     //结构体类型名 必须唯一
     if(node == NULL) return;
     FieldList field = (FieldList)malloc(sizeof(FieldList_));
@@ -296,7 +296,7 @@ void OptTag(Node *node,Type spec){
 //a  a[10][20]...
 
 FieldList VarDec(Node *type,Type spec) {
-    printf("var %s %s %d\n", type->name, type->token, type->line);
+    // printf("var %s %s %d\n", type->name, type->token, type->line);
     Node* first = type->first_son;
     
     if(strcmp(first->name, "ID") == 0) {
@@ -320,10 +320,6 @@ FieldList VarDec(Node *type,Type spec) {
 
         Node* size_node = first->follow->follow;
         int size = atoi(size_node->name);
-
-        // if(size == 0) {
-        //     CrushError(12, type);
-        // }
 
         Type array_type = (Type)malloc(sizeof(Type_));
         array_type->kind = ARRAY;
@@ -366,7 +362,7 @@ int GetParamNum(FieldList args) {
 // FunDec          : ID LP VarList RP
 //                 | ID LP RP              
 void FunDec(Node *node,Type spec,int state) {
-    printf("FuncDec %s %s %d\n", node->name, node->token, node->line);
+    // printf("FuncDec %s %s %d\n", node->name, node->token, node->line);
 
     Node* id_node = node->first_son;
     char* func_name = strdup(id_node->token);
@@ -384,10 +380,10 @@ void FunDec(Node *node,Type spec,int state) {
     FieldList existence = ifexist(func_name, func->scope_id);
     if(existence != NULL) {
         if(existence->type->kind != FUNCTION) {
-            CrushError(4, node);
+            printf("Error type 4 at Line %d: Redefined function \"%s\"\n", node->line, node->first_son->token);
         }
         else if(state == DEFIN) {
-            CrushError(4, node);
+            printf("Error type 4 at Line %d: Redefined function \"%s\"\n", node->line, node->first_son->token);
         }
         else if(!args_matched(existence->type->u.function.params, args)) {
             CrushError(9, node);
@@ -408,7 +404,7 @@ void FunDec(Node *node,Type spec,int state) {
 // VarList         : ParamDec COMMA VarList
 //                 | ParamDec
 FieldList VarList(Node* node) {
-    printf("VarList %s %s %d\n", node->name, node->token, node->line);
+    // printf("VarList %s %s %d\n", node->name, node->token, node->line);
 
     Node* prs = node->first_son;
     FieldList prs_field = ParamDec(prs);
@@ -425,7 +421,7 @@ FieldList VarList(Node* node) {
 
 // ParamDec        : Specifier VarDec
 FieldList ParamDec(Node* node) {
-    printf("ParmDec %s %s %d\n", node->name, node->token, node->line);
+    // printf("ParmDec %s %s %d\n", node->name, node->token, node->line);
 
     Type spec = Specifier(node->first_son);
     FieldList var = VarDec(node->first_son->follow, spec);
@@ -443,25 +439,35 @@ FieldList ParamDec(Node* node) {
 
 // CompSt          : LC DefList Stmt RC                
 void CompSt(Node *node,Type ftype) {
-    printf("CompSt %s %s %d\n", node->name, node->token, node->line);
+    // printf("CompSt %s %s %d\n", node->name, node->token, node->line);
 
     enter_scope();
 
-    Node* defList = node->first_son->follow;
-    Node* stmtList = defList->follow;
+    Node* lc = node->first_son;
+    Node* defList = NULL;
+    Node* stmtList = NULL;
 
-    DefList(defList);
-    Node * stmtlist =node->first_son->follow->follow;
-    while(stmtlist!=NULL)
-    {
-        if(strcmp(stmtlist->name, "StmtList") != 0) {
-            break;
+    if(node->num_child == 3) {
+        if(strcmp(lc->follow->name, "DefList") == 0) {
+            defList = lc->follow;
         }
-        Stmt(stmtlist->first_son,ftype);
-        stmtlist = stmtlist->first_son->follow;
+        else if(strcmp(lc->follow->name, "StmtList") == 0) {
+            stmtList = lc->follow;
+        }
+    }
+    else if(node->num_child == 4) {
+        defList = lc->follow;
+        stmtList = defList->follow;
+    }
+
+    if(defList != NULL) {
+        DefList(defList);
+    }
+    while(stmtList!=NULL) {
+        Stmt(stmtList->first_son,ftype);
+        stmtList = stmtList->first_son->follow;
         
     }
-    
     exit_scope();
     
 }
@@ -474,7 +480,7 @@ void CompSt(Node *node,Type ftype) {
 //         | WHILE LP Exp RP Stmt                    
 //         ;  
 void Stmt(Node *node,Type ftype) {
-    printf("Stmt %s %s %d\n", node->name, node->token, node->line);
+    // printf("Stmt %s %s %d\n", node->name, node->token, node->line);
 
     if (strcmp(node->first_son->name, "CompSt") == 0){
         CompSt(node->first_son,ftype);
@@ -483,7 +489,9 @@ void Stmt(Node *node,Type ftype) {
         Exp(node->first_son);
     }
     else if (strcmp(node->first_son->name, "RETURN") == 0){
+        // printf("waht???\n");
         Type rtype = Exp(node->first_son->follow);
+        
         if(TypeEqual(ftype,rtype)== 0){
             if(rtype != NULL)//可能有问题
                 printf("Error type 8 at Line %d: Type mismatched for return.\n", node->line);
@@ -507,7 +515,7 @@ void DefList(Node *node) {
     if(node == NULL) {
         return ;
     }
-    printf("DefList %s %s %d\n", node->name, node->token, node->line);
+    // printf("DefList %s %s %d\n", node->name, node->token, node->line);
     Node* def = node->first_son;
     Node* defList = def->follow;
 
@@ -517,7 +525,7 @@ void DefList(Node *node) {
 
 // Def             : Specifier DecList SEMI
 void Def(Node *node) {
-    printf("Def %s %s %d\n", node->name, node->token, node->line);
+    // printf("Def %s %s %d\n", node->name, node->token, node->line);
 
     Type spec = Specifier(node->first_son);
 
@@ -528,7 +536,7 @@ void Def(Node *node) {
 // DecList         : Dec              
 //                 | Dec COMMA DecList 
 void DecList(Node *node,Type spec) {
-    printf("DecList %s %s %d\n", node->name, node->token, node->line);
+    // printf("DecList %s %s %d\n", node->name, node->token, node->line);
 
     Node* dec = node->first_son;
 
@@ -543,7 +551,7 @@ void DecList(Node *node,Type spec) {
 //                 | VarDec ASSIGNOP Exp
 void Dec(Node *node,Type spec) {
     if(node == NULL) return;
-    printf("Dec %s %s %d\n", node->name, node->token, node->line);
+    // printf("Dec %s %s %d\n", node->name, node->token, node->line);
 
     Node* var = node->first_son;
     FieldList varField = VarDec(var, spec);
@@ -586,7 +594,7 @@ void Dec(Node *node,Type spec) {
 //                 | INT                   
 //                 | FLOAT
 Type Exp(Node *node){
-    printf("Exp %s %s %d\n", node->name, node->token, node->line);
+    // printf("Exp %s %s %d\n", node->name, node->token, node->line);
 
     if(node == NULL) return NULL;
     if (node->num_child == 3 && strcmp(node->first_son->follow->name, "ASSIGNOP") == 0){   
@@ -745,9 +753,8 @@ Type Exp(Node *node){
 
         
         t->u.function.funcType= rtype->u.function.funcType;
-
-        
         if(TypeEqual(t,rtype) == 0){
+            
             if(!(t->u.function.paramNum==0 && rtype->u.function.paramNum==0)){
                 printf("Error type 9 at Line %d: Params wrong in function %s.\n", node->line, node->first_son->token);
                 t->u.function.funcType=NULL;

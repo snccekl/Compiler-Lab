@@ -61,6 +61,7 @@ Specifier       : TYPE                          {$$ = createNode(1, "Specifier",
 
 StructSpecifier : STRUCT OptTag LC DefList RC   {$$ = createNode(1, "StructSpecifier","");addNode($$, 5, $1, $2, $3, $4, $5);}
                 | STRUCT Tag                    {$$ = createNode(1, "StructSpecifier","");addNode($$, 2, $1, $2);}
+                | error
                 ;
             
 OptTag          : ID                            {$$ = createNode(1, "OptTag","");addNode($$, 1, $1);}
@@ -113,7 +114,6 @@ DefList         : Def DefList                   {$$ = createNode(1, "DefList",""
                 ;
 
 Def             : Specifier DecList SEMI        {$$ = createNode(1, "Def","");addNode($$, 3, $1, $2, $3);}
-                
                 ;
             
 DecList         : Dec                           {$$ = createNode(1, "DecList","");addNode($$, 1, $1);}

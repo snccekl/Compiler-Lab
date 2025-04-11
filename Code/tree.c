@@ -42,6 +42,7 @@ void addNode(Node* parent, int ChildNum, ...){
 
         if(child == NULL) {
             // printf("NULL child:%d\n", i + 1);
+            parent->num_child--;
             continue;
         }
         child->parent = parent;
