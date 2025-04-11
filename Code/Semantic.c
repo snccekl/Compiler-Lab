@@ -106,6 +106,7 @@ FieldList search(char *name
 	while(p!=NULL){
 		if(strcmp(name,p->name)==0){
             scope sc = sc_table[current_id];
+            printf("%d %d\n",current_id,p->scope_id);
             //从内层往外层找
             for(int i=sc.wno-1;i>=0;i--){
                 if(p->scope_id == sc.w[i]){
