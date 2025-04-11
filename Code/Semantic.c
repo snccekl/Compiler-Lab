@@ -161,7 +161,10 @@ void printSymbol(){
 }
 
 int TypeEqual(Type t1,Type t2){
+    
+
 	if((t1==NULL)||(t2==NULL)) return 0;
+
 	if(t1->kind != t2->kind) return 0;
     if(t1->kind == BASIC){
         return (t1->u.basic == t2->u.basic);

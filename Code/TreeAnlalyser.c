@@ -86,10 +86,11 @@ void Program(Node *root){
 //             |  /* empty */       
 //             ;
 void ExtDefList(Node *node){
-    printf("ExtDefList %s %s %d\n", node->name, node->token, node->line);
+    
     if(node == NULL){
         return;
     }
+    printf("ExtDefList %s %s %d\n", node->name, node->token, node->line);
     if(node->num_child == 2){
         ExtDef(node->first_son);
         ExtDefList(node->first_son->follow);
@@ -127,6 +128,7 @@ void ExtDef(Node *node){
         }
         exit_scope();
     }
+    
 }
 
 // ExtDecList  : VarDec                  
@@ -452,11 +454,16 @@ void CompSt(Node *node,Type ftype) {
     Node * stmtlist =node->first_son->follow->follow;
     while(stmtlist!=NULL)
     {
+        if(strcmp(stmtlist->name, "StmtList") != 0) {
+            break;
+        }
         Stmt(stmtlist->first_son,ftype);
         stmtlist = stmtlist->first_son->follow;
+        
     }
-
+    
     exit_scope();
+    
 }
 
 // Stmt    : Exp SEMI                                
@@ -535,9 +542,9 @@ void DecList(Node *node,Type spec) {
 // Dec             : VarDec             
 //                 | VarDec ASSIGNOP Exp
 void Dec(Node *node,Type spec) {
+    if(node == NULL) return;
     printf("Dec %s %s %d\n", node->name, node->token, node->line);
 
-    if(node == NULL) return;
     Node* var = node->first_son;
     FieldList varField = VarDec(var, spec);
     
@@ -673,6 +680,7 @@ Type Exp(Node *node){
         return field->type;
     }
     if(strcmp(node->first_son->name, "INT") == 0){
+        // printf("INT %s %s %d\n", node->name, node->first_son->token, node->line);
         Type t = (Type) malloc (sizeof(Type_));
         t->kind = BASIC;
         t->u.basic = INT_TYPE;
@@ -723,24 +731,22 @@ Type Exp(Node *node){
                 t->u.function.paramNum++;
                 fp->tail = t->u.function.params;
                 t->u.function.params = fp;
-                
-                
 
                 if(args->num_child == 3){
-                    
+                    // printf("waht\n");
                     args = args->first_son->follow->follow;
+                    
                 }
                 else{
                     break;
                 }
-                
             }
-            printf("Finished Args\n");
         }
 
         
         t->u.function.funcType= rtype->u.function.funcType;
 
+        
         if(TypeEqual(t,rtype) == 0){
             if(!(t->u.function.paramNum==0 && rtype->u.function.paramNum==0)){
                 printf("Error type 9 at Line %d: Params wrong in function %s.\n", node->line, node->first_son->token);
@@ -752,7 +758,7 @@ Type Exp(Node *node){
             }
         }
         else{
-          return rtype->u.function.funcType;
+            return rtype->u.function.funcType;
         }
     }
 //         | Exp LB Exp RB     a[b]  左值
