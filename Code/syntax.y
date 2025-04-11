@@ -47,7 +47,8 @@ ExtDefList      : ExtDef ExtDefList             {$$ = createNode(1, "ExtDefList"
 ExtDef          : Specifier ExtDecList SEMI     {$$ = createNode(1, "ExtDef","");addNode($$, 3, $1, $2, $3);}
                 | Specifier SEMI                {$$ = createNode(1, "ExtDef","");addNode($$, 2, $1, $2);}
                 | Specifier FunDec CompSt       {$$ = createNode(1, "ExtDef","");addNode($$, 3, $1, $2, $3);}
-                | Specifier error               {error++;yyerror("Syntax error.");}
+                /*| Specifier error               {error++;yyerror("Syntax error.");}*/
+                |error
                 ;
 
 ExtDecList      : VarDec                        {$$ = createNode(1, "ExtDecList","");addNode($$, 1, $1);}
@@ -57,11 +58,11 @@ ExtDecList      : VarDec                        {$$ = createNode(1, "ExtDecList"
 
 Specifier       : TYPE                          {$$ = createNode(1, "Specifier","");addNode($$, 1, $1);}
                 | StructSpecifier               {$$ = createNode(1, "Specifier","");addNode($$, 1, $1);}
+                | error
                 ;
 
 StructSpecifier : STRUCT OptTag LC DefList RC   {$$ = createNode(1, "StructSpecifier","");addNode($$, 5, $1, $2, $3, $4, $5);}
                 | STRUCT Tag                    {$$ = createNode(1, "StructSpecifier","");addNode($$, 2, $1, $2);}
-                | error
                 ;
             
 OptTag          : ID                            {$$ = createNode(1, "OptTag","");addNode($$, 1, $1);}
@@ -79,7 +80,6 @@ VarDec          : ID                            {$$ = createNode(1, "VarDec","")
 
 FunDec          : ID LP VarList RP              {$$ = createNode(1, "FunDec","");addNode($$, 4, $1, $2, $3, $4);}
                 | ID LP RP                      {$$ = createNode(1, "FunDec","");addNode($$, 3, $1, $2, $3);}
-                | error                         {error++;yyerror("error");}
                 ;
             
 VarList         : ParamDec COMMA VarList        {$$ = createNode(1, "VarList","");addNode($$, 3, $1, $2, $3);}
