@@ -78,11 +78,9 @@ void initHashtable();
 int insert(FieldList f);
 //search会找外层的 用于判断是否未定义以使用 所以肯定是从当前层找
 FieldList search(char *name,int flag);
-//ifexist会找同层的 用于判断是否重复定义
+//ifexist判断是否重复定义
 FieldList ifexist(char *name,int id);
 int TypeEqual(Type type1,Type type2);
-//debug用
-void printSymbol();
 
 //树
 void Program(Node *root);

@@ -14,9 +14,8 @@ unsigned int hash_pjw(char *name){
 		if(i=val & ~0x3fff){
 			val = (val ^ (i>>12)) & 0x3fff;
 		}
-		
+		return val % HASH_SIZE;
 	}
-    return val % HASH_SIZE;
 }
 
 void initHashtable(){
@@ -103,31 +102,65 @@ FieldList search(char *name
 	}
 	unsigned int key;
     key = hash_pjw(name);
-	FieldList p=hashTable[key];
-	while(p!=NULL){
-		if(strcmp(name,p->name)==0){
-            scope sc = sc_table[current_id];
-            
-            //从内层往外层找
-            for(int i=sc.wno-1;i>=0;i--){
-                //printf("%d %d\n", sc.w[i], p->scope_id);
-                if(p->scope_id == sc.w[i]){
+
+    FieldList found = NULL;
+    int max_depth = -1;
+    for(int offset = 0; offset < HASH_SIZE; offset++) {
+        int current_key = (key + offset) % HASH_SIZE;
+
+        FieldList p = hashTable[current_key];
+        if(p == NULL)
+            break;
+
+        if(strcmp(name, p->name) != 0)
+            continue;
+        
+        scope sc = sc_table[current_id];
+        for(int i = sc.wno - 1; i >= 0; i--) {
+            if(p->scope_id == sc.w[i]) {
+                if(i > max_depth) {
                     if(flag != 2 && p->type->kind == STR_SPE){
-                        return NULL;//与结构类型重名是不行的
+                        continue;//与结构类型重名是不行的
                     }
                     //应该是直接返回？
                     // if(flag == 1 && p->type->kind == FUNCTION)
                     // return p;
                     // if(flag == 0 && p->type->kind == BASIC)
-                    return p;
-
+                    
+                    max_depth = i;
+                    found = p;
                 }
+                break;
             }
-		}
-		key=(++key)%HASH_SIZE;
-		p=hashTable[key];
-	}
-	return NULL;
+        }
+    }
+    
+    return found;
+
+	// FieldList p=hashTable[key];
+	// while(p!=NULL){
+	// 	if(strcmp(name,p->name)==0){
+    //         scope sc = sc_table[current_id];
+    //         printf("%d %d %d\n", sc.w[sc.wno - 1], current_id, p->scope_id);
+    //         //从内层往外层找
+            
+    //         for(int i=sc.wno-1;i>=0;i--){
+    //             if(p->scope_id == sc.w[i]){
+    //                 if(flag != 2 && p->type->kind == STR_SPE){
+    //                     return NULL;//与结构类型重名是不行的
+    //                 }
+    //                 //应该是直接返回？
+    //                 // if(flag == 1 && p->type->kind == FUNCTION)
+    //                 // return p;
+    //                 // if(flag == 0 && p->type->kind == BASIC)
+    //                 return p;
+    //             }
+    //         }
+	// 	}
+	// 	key=(++key)%HASH_SIZE;
+	// 	p=hashTable[key];
+	// }
+	// return NULL;
 }
 
 FieldList ifexist(char *name,int id){
@@ -150,17 +183,6 @@ FieldList ifexist(char *name,int id){
 		p=hashTable[key];
 	}
 	return NULL;
-}
-
-
-void printSymbol(){
-    printf("-------------\n");
-	for(int i=0;i<HASH_SIZE;i++)
-    {
-		if(hashTable[i]!=NULL)printf("%d %s\n",hashTable[i]->type->kind,hashTable[i]->name);
-    }
-    printf("-------------\n");
-
 }
 
 int TypeEqual(Type t1,Type t2){

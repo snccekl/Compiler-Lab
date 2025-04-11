@@ -1,10 +1,9 @@
-struct Position 
-{     
-float x,y; 
-}; 
-int func(int a); 
-int func(struct Position p); 
-int main() 
-{ 
+int dummy;
 
+int main() {
+    float dummy = 0.0;
+    {
+        int dummy[10];
+        dummy[0] = dummy[0] + 1;
+    }
 }
