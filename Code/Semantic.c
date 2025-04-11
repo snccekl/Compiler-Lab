@@ -14,8 +14,9 @@ unsigned int hash_pjw(char *name){
 		if(i=val & ~0x3fff){
 			val = (val ^ (i>>12)) & 0x3fff;
 		}
-		return val % HASH_SIZE;
+		
 	}
+    return val % HASH_SIZE;
 }
 
 void initHashtable(){
@@ -106,9 +107,10 @@ FieldList search(char *name
 	while(p!=NULL){
 		if(strcmp(name,p->name)==0){
             scope sc = sc_table[current_id];
-            printf("%d %d\n",current_id,p->scope_id);
+            
             //从内层往外层找
             for(int i=sc.wno-1;i>=0;i--){
+                //printf("%d %d\n", sc.w[i], p->scope_id);
                 if(p->scope_id == sc.w[i]){
                     if(flag != 2 && p->type->kind == STR_SPE){
                         return NULL;//与结构类型重名是不行的
