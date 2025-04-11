@@ -7,6 +7,8 @@
 #include <assert.h>
 #include "tree.h"
 
+#define DEBUG_MODE 0
+
 #define HASH_SIZE 0x3fff
 
 #define INT_TYPE 1

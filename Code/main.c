@@ -21,9 +21,12 @@ int main(int argc, char** argv) {
     yyrestart(f);
     yyparse();
     if(error == 0){
-        // printTree(Root, 0);
         initHashtable();
-        // printf("\nStart analyze\n");
+        
+        if(DEBUG_MODE == 1) {
+            printTree(Root, 0);
+            printf("\nStart analyze\n");
+        }
         Program(Root);
     }
     return 0;

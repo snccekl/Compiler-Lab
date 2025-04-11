@@ -60,7 +60,6 @@ void CrushError(int type, Node* node) {
 }
 
 void debuger(char* funcName, Node* node) {
-    int DEBUG_MODE = 0;
     if(DEBUG_MODE == 1) {
         printf("%s %s %s %d\n", funcName,node->name, node->token, node->line);
     }
@@ -811,10 +810,14 @@ Type Exp(Node *node){
             return NULL;
         }
         Type t2 = Exp(node->first_son->follow->follow);
-        if( !(t2->kind ==BASIC && t2->u.basic == INT_TYPE)){
+        if(t2 == NULL)
+            return NULL;
+
+        if(!(t2->kind ==BASIC && t2->u.basic == INT_TYPE)){
             printf("Error type 12 at Line %d: there is not an integer in [" "].\n", node->line);
             return NULL;
         }
+        
         return t1->u.array.elem;
     }
 
