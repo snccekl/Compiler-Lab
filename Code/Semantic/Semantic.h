@@ -5,9 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "tree.h"
-
-#define DEBUG_MODE 0
+#include "../Tree/tree.h"
+#include "../config.h"
 
 #define HASH_SIZE 0x3fff
 

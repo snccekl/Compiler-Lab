@@ -1,7 +1,7 @@
 %{
     #include <stdio.h>
     #include <stdlib.h>
-    #include "tree.h"
+    #include "./Tree/tree.h"
     #include "lex.yy.c"
     extern int yylineno;
     extern Node* Root;

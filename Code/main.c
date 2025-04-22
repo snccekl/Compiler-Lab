@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdarg.h>
-#include "Semantic.h"
-#include "tree.h"
+#include "./Semantic/Semantic.h"
+#include "./Tree/tree.h"
+#include "config.h"
 
 void perror(const char *__s);
 int yyrestart();
@@ -23,10 +24,14 @@ int main(int argc, char** argv) {
     if(error == 0){
         initHashtable();
         
-        if(DEBUG_MODE == 1) {
+        if(PRINT_PARSE_TREE == 1) {
             printTree(Root, 0);
-            printf("\nStart analyze\n");
         }
+        
+        if(SEMANTIC_DEBUG_MODE == 1) {
+            printf("\nstart semantic anlalyz\n");
+        }
+
         Program(Root);
     }
     return 0;

@@ -1,6 +1,6 @@
 %{
     #include "syntax.tab.h" 
-	#include "tree.h"
+	#include "./Tree/tree.h"
     void handle_yytext(char* identification, char* yytext){
         yylval.node = createNode(0, identification,yytext);
     }
