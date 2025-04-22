@@ -1,6 +1,9 @@
 #ifndef TREE_H
 #define TREE_H
 
+#include <stdio.h>
+#include <stdlib.h>
+
 struct Node{
     char name[256];
     char token[256];
@@ -12,12 +15,14 @@ struct Node{
 };
 typedef struct Node Node;
 
-
+// createNode 用于创建节点
 Node* createNode(int type, char* name,char * yytext);
 
-//这个函数会接受多个参数，为 1(ChildNUm) + 1(parent) + ChildNum(子节点数量)
+// addNode 用于为父亲节点添加子节点
+// 这个函数会接受多个参数，为 1(ChildNUm) + 1(parent) + ChildNum(子节点数量)
 void addNode(struct Node* parent, int ChildNum, ...);
 
+// printTree 用于输出语法分析(是语法分析树不是抽象语法树！！！)
 void printTree(struct Node* prs, int floor);
 
 #endif
