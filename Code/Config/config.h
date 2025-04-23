@@ -12,4 +12,6 @@
 
 // 注：请只修改数值部分，且数值只可能为0或1
 
+// 用于字符串复制
+char* strdup(const char* s);
 #endif

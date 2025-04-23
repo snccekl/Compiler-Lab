@@ -6,7 +6,7 @@
 #include <string.h>
 #include <assert.h>
 #include "../Tree/tree.h"
-#include "../config.h"
+#include "../Config/config.h"
 
 #define HASH_SIZE 0x3fff
 

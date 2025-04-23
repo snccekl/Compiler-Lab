@@ -2,7 +2,7 @@
 #include <stdarg.h>
 #include "./Semantic/Semantic.h"
 #include "./Tree/tree.h"
-#include "config.h"
+#include "./Config/config.h"
 
 void perror(const char *__s);
 int yyrestart();
@@ -33,6 +33,9 @@ int main(int argc, char** argv) {
         }
 
         Program(Root);
+
+        Node* ast_root = parseTreeToAst(Root);
+        // printTree(ast_root, 0);
     }
     return 0;
 }

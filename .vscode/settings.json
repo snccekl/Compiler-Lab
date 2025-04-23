@@ -61,6 +61,14 @@
     "typeinfo": "cpp",
     "semantic.h": "c",
     "stdio.h": "c",
-    "tree.h": "c"
+    "tree.h": "c",
+    "cstdlib": "c",
+    "cstring": "c",
+    "array": "c",
+    "compare": "c",
+    "functional": "c",
+    "tuple": "c",
+    "type_traits": "c",
+    "utility": "c"
   }
 }

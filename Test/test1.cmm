@@ -1,9 +1,28 @@
 int dummy;
+int check1;
+struct Node {
+    int a, b, c;
+    float d;
+};
+int check2;
+int test[10][10][10];
 
 int main() {
     float dummy = 0.0;
+    int a = 1;
+    
     {
         int dummy[10];
         dummy[0] = dummy[0] + 1;
+    }
+
+    test[1][2][3] = 10;
+    if(a < 0)
+        a = a + 1;
+    else
+        a = a - 1;
+    
+    while(a > 5) {
+        a = a - 1;
     }
 }
