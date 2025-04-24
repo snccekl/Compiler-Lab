@@ -5,7 +5,7 @@
 
 #include "tree.h"
 
-Node* createAstNode(char* name, char* token, int line);
+Node* createAstNode(char* name, char* token, int line, int scope_id, int flag);
 
 Node* transferExtDefList(Node* node, Node* parent);
 Node* transferExtDef(Node* node, Node* parent);

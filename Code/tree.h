@@ -4,13 +4,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../Config/config.h"
+#include "config.h"
 
 struct Node{
     char name[256];
     char token[256];
     int type, line;
     int num_child;
+
+    int flag;
+    int scope_id;
     struct Node* parent;
     struct Node* first_son;
     struct Node* follow;
@@ -30,7 +33,7 @@ void printTree(struct Node* prs, int floor);
 // 用于将语法分析树(parse_tree)转为抽象语法树(AST)
 Node* parseTreeToAst(Node* root);
 
-// 用于输出AST
+// 用于输出AST，floor: 层数， pipe: 用来辅助输出树的，初始为0
 void printAST(Node* prs, int floor, unsigned long long pipe);
 
 #endif

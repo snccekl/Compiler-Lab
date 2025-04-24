@@ -76,6 +76,8 @@ void Program(Node *root){
         return;
     }
     debuger("Program", root);
+    root->scope_id = current_id;
+
     if(!strcmp("ExtDefList" , root->first_son->name)){
         ExtDefList(root ->first_son);
     }
@@ -91,6 +93,7 @@ void ExtDefList(Node *node){
     }
     debuger("ExtDefList", node);
     
+    node->scope_id = scope_id;
     Node* extDef = node->first_son;
     ExtDef(node->first_son);  
     ExtDefList(node->first_son->follow);
@@ -102,6 +105,8 @@ void ExtDefList(Node *node){
 //             | Specifier FunDec SEMI  
 void ExtDef(Node *node){
     debuger("ExtDef", node);
+    node->scope_id = current_id;
+
     //先确定返回值
     Type specifier = Specifier(node->first_son);
 
@@ -135,6 +140,8 @@ void ExtDef(Node *node){
 //             ;
 void ExtDecList(Node * node,Type spec){
     debuger("ExtDecList", node);
+    node->scope_id =current_id;
+
     FieldList field = VarDec(node->first_son,spec);
     if(ifexist(field->name,field->scope_id) != NULL)
         printf("Error type 3 at Line %d: Redefined variable %s.\n",node->first_son->line,field->name);
@@ -153,6 +160,8 @@ void ExtDecList(Node * node,Type spec){
 Type Specifier(Node *node){
     // TYPE
     debuger("Specifier", node);
+    node->scope_id =current_id;
+
     if(strcmp(node->first_son->name,"TYPE")==0){
         Type spec = (Type)malloc(sizeof(Type_));
         spec->kind = BASIC;
@@ -179,6 +188,9 @@ Type Specifier(Node *node){
 Type StructSpecifier(Node *node)
 {
     debuger("StructSpecifier", node);
+    node->scope_id =current_id;
+    node->flag = 2;
+
     Type spec = (Type)malloc(sizeof(Type_));
     spec->kind = STRUCTURE;
     //这里注意 如果opttag为空就会是NULL 会出错
@@ -188,7 +200,7 @@ Type StructSpecifier(Node *node)
         Node * ID = Tag->first_son;
         char *str = ID->token;
         //结构体类型
-        FieldList field = search(str,2);
+        FieldList field = search(str, 2, current_id);
         if(field == NULL){
             printf("Error type 17 at Line %d: Undefined structure %s.\n",ID->line,str);
             spec->u.structure = NULL;
@@ -205,6 +217,7 @@ Type StructSpecifier(Node *node)
 
     //STRUCT (OptTag) LC DefList RC
     enter_scope();
+    node->scope_id = current_id;
 
     Node* first = node->first_son;
     Node* defList = NULL;
@@ -289,6 +302,8 @@ Type StructSpecifier(Node *node)
 //         ;
 void OptTag(Node *node,Type spec){
     debuger("OptTag", node);
+    node->scope_id =current_id;
+
     //结构体类型名 必须唯一
     if(node == NULL) return;
     FieldList field = (FieldList)malloc(sizeof(FieldList_));
@@ -311,6 +326,9 @@ void OptTag(Node *node,Type spec){
 
 FieldList VarDec(Node *type,Type spec) {
     debuger("VarDec", type);
+    type->scope_id =current_id;
+    type->flag = 0;
+
     Node* first = type->first_son;
     
     if(strcmp(first->name, "ID") == 0) {
@@ -377,6 +395,8 @@ int GetParamNum(FieldList args) {
 //                 | ID LP RP              
 void FunDec(Node *node,Type spec,int state) {
     debuger("FunDec", node);
+    node->scope_id = sc_table[current_id].parent_id;
+    node->flag = 1;
 
     Node* id_node = node->first_son;
     char* func_name = strdup(id_node->token);
@@ -419,6 +439,7 @@ void FunDec(Node *node,Type spec,int state) {
 //                 | ParamDec
 FieldList VarList(Node* node) {
     debuger("VarList", node);
+    node->scope_id =current_id;
 
     Node* prs = node->first_son;
     FieldList prs_field = ParamDec(prs);
@@ -436,7 +457,8 @@ FieldList VarList(Node* node) {
 // ParamDec        : Specifier VarDec
 FieldList ParamDec(Node* node) {
     debuger("ParamDec", node);
-
+    node->scope_id =current_id;
+    
     Type spec = Specifier(node->first_son);
     FieldList var = VarDec(node->first_son->follow, spec);
 
@@ -454,8 +476,12 @@ FieldList ParamDec(Node* node) {
 // CompSt          : LC DefList Stmt RC                
 void CompSt(Node *node,Type ftype) {
     debuger("CompSt", node);
+    
+    int is_enter = strcmp(node->parent->name, "ExtDef");
+    if(is_enter)
+        enter_scope();
 
-    enter_scope();
+    node->scope_id =current_id;
 
     Node* lc = node->first_son;
     Node* defList = NULL;
@@ -482,7 +508,9 @@ void CompSt(Node *node,Type ftype) {
         stmtList = stmtList->first_son->follow;
         
     }
-    exit_scope();
+    
+    if(is_enter)
+        exit_scope();
     
 }
 
@@ -495,6 +523,7 @@ void CompSt(Node *node,Type ftype) {
 //         ;  
 void Stmt(Node *node,Type ftype) {
     debuger("Stmt", node);
+    node->scope_id =current_id;
 
     if (strcmp(node->first_son->name, "CompSt") == 0){
         CompSt(node->first_son,ftype);
@@ -532,6 +561,8 @@ void DefList(Node *node) {
         return ;
     }
     debuger("DefList", node);
+    node->scope_id = current_id;
+
     Node* def = node->first_son;
     Node* defList = def->follow;
 
@@ -542,6 +573,7 @@ void DefList(Node *node) {
 // Def             : Specifier DecList SEMI
 void Def(Node *node) {
     debuger("Def", node);
+    node->scope_id =current_id;
 
     Type spec = Specifier(node->first_son);
 
@@ -553,6 +585,7 @@ void Def(Node *node) {
 //                 | Dec COMMA DecList 
 void DecList(Node *node,Type spec) {
     debuger("DecList", node);
+    node->scope_id =current_id;
 
     Node* dec = node->first_son;
 
@@ -568,6 +601,7 @@ void DecList(Node *node,Type spec) {
 void Dec(Node *node,Type spec) {
     if(node == NULL) return;
     debuger("Dec", node);
+    node->scope_id =current_id;
 
     Node* var = node->first_son;
     FieldList varField = VarDec(var, spec);
@@ -611,6 +645,7 @@ void Dec(Node *node,Type spec) {
 //                 | FLOAT
 Type Exp(Node *node){
     debuger("Exp", node);
+    node->scope_id =current_id;
 
     if(node == NULL) return NULL;
     if (node->num_child == 3 && strcmp(node->first_son->follow->name, "ASSIGNOP") == 0){   
@@ -698,8 +733,9 @@ Type Exp(Node *node){
     if(node->num_child == 1 && (strcmp(node->first_son->name, "ID") == 0) ){
         //ID
         //找变量
-        
-        FieldList field = search(node->first_son->token,0);
+        node->flag = 0;
+
+        FieldList field = search(node->first_son->token, 0, current_id);
         if(field == NULL){
             printf("Error type 1 at Line %d: Undefined variable %s.\n",node->line, node->first_son->token);
             return NULL;
@@ -726,7 +762,9 @@ Type Exp(Node *node){
 //         | ID LP Args RP     a(b)
 //         | ID LP RP          a()
         //找函数名
-        FieldList field = search(node->first_son->token,1);
+        node->flag = 1;
+
+        FieldList field = search(node->first_son->token, 1, current_id);
         if(field == NULL){
             printf("Error type 2 at Line %d: Undefined function %s.\n", node->line, node->first_son->token);
             return NULL;
@@ -768,6 +806,7 @@ Type Exp(Node *node){
         ( strcmp(node->first_son->follow->name, "LB") == 0))
     {
         //Exp LB Exp RB 
+        node->flag = 0;
         Node * exp1 = node->first_son;
        
         Type t1 = Exp(exp1);
@@ -794,6 +833,7 @@ Type Exp(Node *node){
     if (node->num_child ==3 &&(strcmp(node->first_son->follow->name, "DOT") == 0)){
         Node * exp1 = node->first_son;
         Type t1 = Exp(exp1);
+        exp1->flag = 2;
         if(t1 == NULL) {
             return NULL;
         }

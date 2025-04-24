@@ -93,11 +93,13 @@ int insert(FieldList f){
 	return 0;
 }
 
-FieldList search(char *name
-,int flag// flag=1:function flag =2: 结构体 flag=0:变量 
+FieldList search(
+    char *name,
+    int flag,    // flag=1:function flag =2: 结构体 flag=0:变量
+    int scope_id
 )
 {
-	if(name == NULL){
+	if(name == NULL || flag == -1 || scope_id == -1){
 		return NULL;
 	}
 	unsigned int key;
@@ -115,7 +117,7 @@ FieldList search(char *name
         if(strcmp(name, p->name) != 0)
             continue;
         
-        scope sc = sc_table[current_id];
+        scope sc = sc_table[scope_id];
         for(int i = sc.wno - 1; i >= 0; i--) {
             if(p->scope_id == sc.w[i]) {
                 if(i > max_depth) {
@@ -161,6 +163,28 @@ FieldList search(char *name
 	// 	p=hashTable[key];
 	// }
 	// return NULL;
+}
+
+FieldList searchNode(Node* node) {
+    return search(node->token, node->flag, node->scope_id);
+}
+
+char* getType(Type type) {
+    assert(type != NULL);
+
+    if(type->kind == BASIC) {
+        if(type->u.basic == INT_TYPE)
+            return "INT";
+        else if(type->u.basic == FLOAT_TYPE)
+            return "FLOAT";
+    }
+    else if(type->kind == STRUCTURE)
+        return "STRUCT";
+    else if(type->kind == ARRAY)
+        return "ARRAY";
+    else if(type->kind == FUNCTION)
+        return getType(type->u.function.funcType);
+    return "ELSE";
 }
 
 FieldList ifexist(char *name,int id){

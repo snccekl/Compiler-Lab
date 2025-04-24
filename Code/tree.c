@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include <string.h>
 #include "tree.h"
+#include "Semantic.h"
+
 extern int yylineno;
 //API
 Node* createNode(int type, char* name,char * yytext){
@@ -16,6 +18,8 @@ Node* createNode(int type, char* name,char * yytext){
     node->parent = NULL;
     node->first_son = NULL;
     node->follow = NULL;
+    node->flag = -1;
+    node->scope_id = -1;
 
     return node;
     // return NULL;
@@ -119,6 +123,16 @@ void printAST(Node* prs, int floor, unsigned long long pipe) {
     printf("%s", prs->name);
     if(strlen(prs->token) != 0)
         printf(": %s", prs->token);
+
+
+    if(!strcmp(prs->name, "Block") || !strcmp(prs->name, "FieldList")) {
+        printf(" (Scope  %d)", prs->scope_id);
+    }
+
+    FieldList field = searchNode(prs);
+    if(field != NULL) {
+        printf(" (Type: %s)", getType(field->type));
+    }
     printf("\n");
 
     if(prs->first_son != NULL) {

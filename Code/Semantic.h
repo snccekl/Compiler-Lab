@@ -5,8 +5,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "../Tree/tree.h"
-#include "../Config/config.h"
+#include "tree.h"
+#include "config.h"
 
 #define HASH_SIZE 0x3fff
 
@@ -76,7 +76,10 @@ unsigned int hash_pjw(char *name);
 void initHashtable();
 int insert(FieldList f);
 //search会找外层的 用于判断是否未定义以使用 所以肯定是从当前层找
-FieldList search(char *name,int flag);
+FieldList search(char *name,int flag, int scope_id);
+FieldList searchNode(Node* node);
+char* getType(Type type);
+
 //ifexist判断是否重复定义
 FieldList ifexist(char *name,int id);
 int TypeEqual(Type type1,Type type2);

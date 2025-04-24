@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdarg.h>
-#include "./Semantic/Semantic.h"
-#include "./Tree/tree.h"
-#include "./Config/config.h"
+#include "Semantic.h"
+#include "tree.h"
+#include "config.h"
 
 void perror(const char *__s);
 int yyrestart();
@@ -10,6 +10,7 @@ int yyparse();
 int error = 0;
 
 struct Node * Root = NULL;
+Node* ast_root = NULL;
 extern int yylineo;
 
 int main(int argc, char** argv) {
@@ -34,8 +35,10 @@ int main(int argc, char** argv) {
 
         Program(Root);
 
-        Node* ast_root = parseTreeToAst(Root);
-        printAST(ast_root, 0, 0);
+        ast_root = parseTreeToAst(Root);
+
+        if(PRINT_AST)
+            printAST(ast_root, 0, 0);
     }
     return 0;
 }

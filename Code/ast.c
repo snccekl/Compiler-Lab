@@ -1,14 +1,16 @@
 #include "tree.h"
 #include "ast.h"
 
-Node* createAstNode(char* name, char* token, int line) {
+Node* createAstNode(char* name, char* token, int line, int scope_id, int flag) {
     Node* AstNode = createNode(1, name, token);
     AstNode->line = line;
+    AstNode->scope_id = scope_id;
+    AstNode->flag = flag;
     return AstNode;
 }
 
 Node* CopyNode(Node* node) {
-    Node* new_node = createAstNode(node->name, node->token, node->line);
+    Node* new_node = createAstNode(node->name, node->token, node->line, node->scope_id, node->flag);
     new_node->parent = node->parent;
     new_node->follow = node->follow;
     new_node->first_son = node->first_son;
@@ -21,7 +23,8 @@ Node* parseTreeToAst(Node* root) {
         return NULL;
     }
     
-    Node* ast_root = createAstNode(root->name, root->token, root->line);
+    Node* ast_root = createAstNode(root->name, root->token, root->line, root->scope_id, root->flag);
+
     if(!strcmp("ExtDefList" , root->first_son->name)) {
         Node* first_son = transferExtDefList(root->first_son, ast_root);
         ast_root->first_son = first_son;
@@ -82,7 +85,7 @@ Node* transferSpecifier(Node* node) {
     Node* first = node->first_son;
 
     if(!strcmp(first->name, "TYPE")) {
-        Node* type = createAstNode("Type", first->token, first->line);
+        Node* type = createAstNode("Type", first->token, first->line, node->scope_id, node->flag);
         return type;
     }
     else {
@@ -96,12 +99,12 @@ Node* transferSpecifier(Node* node) {
 //                 ;
 Node* transferStructSpecifier(Node* node) {
     Node* structer = node->first_son;
-    Node* ast_struct = createAstNode("StructDecl", "", structer->line);
+    Node* ast_struct = createAstNode("StructDecl", "", structer->line, node->scope_id, node->flag);
 
     // STRUCT Tag
     if(node->num_child == 2) {
         Node* id = structer->follow->first_son;
-        Node* ID = createAstNode(id->name, id->token, id->line);
+        Node* ID = createAstNode(id->name, id->token, id->line, node->scope_id, id->flag);
 
         ast_struct->first_son = ID;
         ID->parent = ast_struct;
@@ -111,14 +114,14 @@ Node* transferStructSpecifier(Node* node) {
     else {
         if(!strcmp(structer->follow->name, "OptTag")) {
             Node* id = structer->follow->first_son;
-            Node* ID = createAstNode(id->name, id->token, id->line);
+            Node* ID = createAstNode(id->name, id->token, id->line, node->scope_id, id->flag);
 
             ast_struct->first_son = ID;
             ID->parent = ast_struct;
         }
 
         Node* prs = structer;
-        Node* field = createAstNode("FieldList", "", node->line);
+        Node* field = createAstNode("FieldList", "", node->line, node->scope_id, -1);
         Node* defList = NULL;
         while(prs != NULL) {
             
@@ -165,8 +168,8 @@ Node* transferVarDec(Node* node, Node* parent, Node* type) {
     Node* var = NULL;
 
     if(!strcmp(first->name, "ID")) {
-        Node* ID = createAstNode(first->name, first->token, first->line);
-        var = createAstNode("VarDecl", "", node->line);
+        Node* ID = createAstNode(first->name, first->token, first->line, node->scope_id, -1);
+        var = createAstNode("VarDecl", "", node->line, node->scope_id, node->flag);
         
         var->parent = parent;
         var->first_son = type;
@@ -179,9 +182,9 @@ Node* transferVarDec(Node* node, Node* parent, Node* type) {
     else if(!strcmp(first->name, "VarDec")) {
         var = transferVarDec(first, parent, type);
 
-        Node* array = createAstNode("ArrayDecl", "", first->line);
+        Node* array = createAstNode("ArrayDecl", "", first->line, node->scope_id, -1);
         Node* array_size = first->follow->follow;
-        Node* ast_size = createAstNode("Size", array_size->token, array_size->line);
+        Node* ast_size = createAstNode("Size", array_size->token, array_size->line, node->scope_id, -1);
 
         array->first_son = ast_size;
 
@@ -210,10 +213,10 @@ Node* transferVarDec(Node* node, Node* parent, Node* type) {
 // FunDec     : ID LP VarList RP
 //            | ID LP RP 
 Node* transferFuncDec(Node* node, Node* parent, Node* type) {
-    Node* func = createAstNode("FuncDecl", "", node->line);
+    Node* func = createAstNode("FuncDecl", "", node->line, node->scope_id, node->flag);
 
     Node* id = node->first_son;
-    Node* ID = createAstNode(id->name, id->token, id->line);
+    Node* ID = createAstNode(id->name, id->token, id->line, node->scope_id, -1);
 
     func->parent = parent;
     func->first_son = type;
@@ -222,7 +225,7 @@ Node* transferFuncDec(Node* node, Node* parent, Node* type) {
     ID->parent = func;
 
     if(node->num_child == 4) {
-        Node* paramList = createAstNode("ParamList", "", node->line);
+        Node* paramList = createAstNode("ParamList", "", node->line, node->scope_id, -1);
         paramList->parent = func;
         paramList->first_son = transferVarList(node->first_son->follow->follow, paramList);
         ID->follow = paramList;
@@ -247,7 +250,7 @@ Node* transferVarList(Node* node, Node* parent) {
 
 // CompSt          : LC DefList Stmt RC
 Node* transferCompSt(Node* node, Node* parent) {
-    Node* compSt = createAstNode("Block", "", node->line);
+    Node* compSt = createAstNode("Block", "", node->line, node->scope_id, -1);
     compSt->parent = parent;
     
     Node* defList = NULL;
@@ -312,11 +315,17 @@ Node* transferDecList(Node* node, Node* parent, Node* type) {
 
     // VarDec ASSIGNOP Exp 
     if(dec->num_child == 3) {
-        Node* exp = transferExp(varDec->follow->follow, var);
+        Node* old_exp = varDec->follow->follow;
+        Node* init = createAstNode("Init", "", old_exp->line, old_exp->scope_id, -1);
+
+        Node* exp = transferExp(old_exp, init);
         Node* prs = var->first_son;
         while(prs->follow != NULL)
             prs = prs->follow;
-        prs->follow = exp;
+
+        
+        prs->follow = init;
+        init->first_son = exp;
     }
 
     // Dec COMMA DecList
@@ -365,7 +374,7 @@ Node* transferStmt(Node* node, Node* parent) {
 
     // RETURN Exp SEMI 
     else if(!strcmp(first->name, "RETURN")) {
-        stmt = createAstNode("ReturnStmt", "", node->line);
+        stmt = createAstNode("ReturnStmt", "", node->line, node->scope_id, -1);
         stmt->parent = parent;
 
         Node* exp = transferExp(first->follow, stmt);
@@ -376,7 +385,7 @@ Node* transferStmt(Node* node, Node* parent) {
     // IF LP Exp RP Stmt %prec LOWER_THAN_ELSE 
     // IF LP Exp RP Stmt ELSE Stmt   
     else if(!strcmp(first->name, "IF")) {
-        stmt = createAstNode("If", "", node->line);
+        stmt = createAstNode("If", "", node->line, node->scope_id, -1);
         stmt->parent = parent;
 
         Node* cond = transferExp(first->follow->follow, stmt);
@@ -392,7 +401,7 @@ Node* transferStmt(Node* node, Node* parent) {
 
     // WHILE LP Exp RP Stmt   
     else if(!strcmp(first->name, "WHILE")) {
-        stmt = createAstNode("While", "", node->line);
+        stmt = createAstNode("While", "", node->line, node->scope_id, -1);
         stmt->parent = parent;
 
         Node* cond = transferExp(first->follow->follow, stmt);
@@ -405,7 +414,7 @@ Node* transferStmt(Node* node, Node* parent) {
     // build block for if_stmt and while_stmt
     if(!strcmp(parent->name, "If") || !strcmp(parent->name, "While")) {
         if(strcmp(first->name, "CompSt")) {
-            Node* block = createAstNode("Block", "", first->line);
+            Node* block = createAstNode("Block", "", first->line, node->scope_id, -1);
             block->parent = stmt->parent;
             block->first_son = stmt;
             stmt->parent = block;
@@ -451,7 +460,7 @@ Node* transferExp(Node* node, Node* parent) {
         Node* second = first->follow->follow;
         Node* Op = first->follow;
 
-        Node* op = createAstNode(Op->name, Op->token, Op->line);
+        Node* op = createAstNode(Op->name, Op->token, Op->line, node->scope_id, -1);
         Node* first_exp = transferExp(first, op);
         Node* second_exp = transferExp(second, op);
         
@@ -470,9 +479,9 @@ Node* transferExp(Node* node, Node* parent) {
     // MINUS Exp %prec UMINUS
     // NOT Exp               
     else if(node->num_child == 2 && !strcmp(first->follow->name, "Exp")) {
-        exp = createAstNode("UnaryOp", "", node->line);
+        exp = createAstNode("UnaryOp", "", node->line, node->scope_id, -1);
 
-        Node* op = createAstNode("Op", first->token, first->line);
+        Node* op = createAstNode("Op", first->token, first->line, node->scope_id, -1);
         Node* first_exp = transferExp(first->follow, exp);
 
         exp->parent = parent;
@@ -484,11 +493,11 @@ Node* transferExp(Node* node, Node* parent) {
     // ID LP Args RP         
     // ID LP RP
     else if(!strcmp(first->name, "ID") && node->num_child > 1) {
-        exp = createAstNode("FuncCall", "", node->line);
-        Node* ID = createAstNode(first->name, first->token, first->line);
+        exp = createAstNode("FuncCall", first->token, node->line, node->scope_id, 2);
+        Node* ID = createAstNode(first->name, first->token, first->line, node->scope_id, -1);
         Node* args = NULL;
         if(node->num_child == 4) {
-            args = createAstNode("Args", "", first->follow->follow->line);
+            args = createAstNode("Args", "", first->follow->follow->line, node->scope_id, -1);
             Node* first_arg = transferArgs(first->follow->follow, args);
             
             args->parent = exp;
@@ -497,27 +506,29 @@ Node* transferExp(Node* node, Node* parent) {
         exp->parent = parent;
         exp->first_son = ID;
         ID->parent = exp;
-        ID->first_son = args;
+        ID->follow = args;
     }
     
     // Exp LB Exp RB 
     else if(!strcmp(first->name, "Exp") && node->num_child == 4) {
-        exp = createAstNode("ArrayAccess", "", first->line);
+        exp = createAstNode("ArrayAccess", "", first->line, node->scope_id, -1);
         Node* first_son = transferExp(first, exp);
-        Node* index = transferExp(first->follow->follow, exp);
+        Node* Index = createAstNode("Index", "", first->follow->follow->line, node->scope_id, -1);
+        Node* index = transferExp(first->follow->follow, Index);
 
         exp->parent = parent;
         exp->first_son = first_son;
-        first_son->follow = index;
-        strcpy(index->name, "Index");
+        first_son->follow = Index;
+        Index->parent = exp;
+        Index->first_son = index;
     }
     
     // Exp DOT ID
     else if(node->num_child == 3 && !strcmp(first->follow->name, "DOT")) {
-        exp = createAstNode("Access", "", first->line);
+        exp = createAstNode("Access", "", first->line, node->scope_id, -1);
         Node* first_son = transferExp(first, exp);
         Node* id = first->follow->follow;
-        Node* access_id = createAstNode(id->name, id->token, id->line);
+        Node* access_id = createAstNode(id->name, id->token, id->line, node->scope_id, -1);
 
         exp->parent = parent;
         exp->first_son = first_son;
@@ -529,7 +540,7 @@ Node* transferExp(Node* node, Node* parent) {
     // INT                   
     // FLOAT
     else if(node->num_child == 1) {
-        exp = createAstNode(first->name, first->token, first->line);
+        exp = createAstNode(first->name, first->token, first->line, node->scope_id, node->flag);
         exp->parent = parent;
     }
 
