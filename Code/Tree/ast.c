@@ -7,6 +7,14 @@ Node* createAstNode(char* name, char* token, int line) {
     return AstNode;
 }
 
+Node* CopyNode(Node* node) {
+    Node* new_node = createAstNode(node->name, node->token, node->line);
+    new_node->parent = node->parent;
+    new_node->follow = node->follow;
+    new_node->first_son = node->first_son;
+    return new_node;
+}
+
 // Program         : ExtDefList
 Node* parseTreeToAst(Node* root) {
     if(root==NULL) {
@@ -110,11 +118,14 @@ Node* transferStructSpecifier(Node* node) {
         }
 
         Node* prs = structer;
+        Node* field = createAstNode("FieldList", "", node->line);
         Node* defList = NULL;
         while(prs != NULL) {
             
             if(!strcmp(prs->name, "DefList")) {
-                defList = transferDefList(prs, ast_struct);
+                defList = transferDefList(prs, field);
+                field->first_son = defList;
+                field->line = defList->line;
                 break;
             }
             prs = prs->follow;
@@ -124,7 +135,7 @@ Node* transferStructSpecifier(Node* node) {
             prs = prs->follow;
         
         if(prs != NULL)
-            prs->follow = defList;
+            prs->follow = field;
         else
             ast_struct->first_son = defList;
     }
@@ -139,7 +150,8 @@ Node* transferExtDecList(Node* node, Node* parent, Node* type) {
     Node* var = transferVarDec(varDec, parent, type);
 
     if(node->num_child == 3) {
-        Node* follow = transferExtDecList(varDec->follow->follow, parent, type);
+        Node* follow_type = CopyNode(type);
+        Node* follow = transferExtDecList(varDec->follow->follow, parent, follow_type);
         var->follow = follow;
     }
     return var;
@@ -309,7 +321,8 @@ Node* transferDecList(Node* node, Node* parent, Node* type) {
 
     // Dec COMMA DecList
     if(node->num_child == 3) {
-        Node* follow = transferDecList(dec->follow->follow, parent, type);
+        Node* follow_type = CopyNode(type);
+        Node* follow = transferDecList(dec->follow->follow, parent, follow_type);
         var->follow = follow;
     }
     return var;
@@ -388,6 +401,18 @@ Node* transferStmt(Node* node, Node* parent) {
         stmt->first_son = cond;
         cond->follow = then;
     }
+
+    // build block for if_stmt and while_stmt
+    if(!strcmp(parent->name, "If") || !strcmp(parent->name, "While")) {
+        if(strcmp(first->name, "CompSt")) {
+            Node* block = createAstNode("Block", "", first->line);
+            block->parent = stmt->parent;
+            block->first_son = stmt;
+            stmt->parent = block;
+            stmt = block;
+        }
+    }
+
     return stmt;
 }
 

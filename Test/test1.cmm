@@ -9,7 +9,7 @@ int test[10][10][10];
 
 int main() {
     float dummy = 0.0;
-    int a = 1;
+    int a = 1, b, c;
     
     {
         int dummy[10];

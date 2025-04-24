@@ -30,4 +30,7 @@ void printTree(struct Node* prs, int floor);
 // 用于将语法分析树(parse_tree)转为抽象语法树(AST)
 Node* parseTreeToAst(Node* root);
 
+// 用于输出AST
+void printAST(Node* prs, int floor, unsigned long long pipe);
+
 #endif

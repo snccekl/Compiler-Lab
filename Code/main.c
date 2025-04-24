@@ -35,7 +35,7 @@ int main(int argc, char** argv) {
         Program(Root);
 
         Node* ast_root = parseTreeToAst(Root);
-        // printTree(ast_root, 0);
+        printAST(ast_root, 0, 0);
     }
     return 0;
 }

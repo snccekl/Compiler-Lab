@@ -96,3 +96,40 @@ void printTree(Node* prs, int floor) {
         }
     }
 }
+
+
+void printAST(Node* prs, int floor, unsigned long long pipe) {
+    if(prs == NULL) {
+        printf("what???\n");
+    }
+
+    for(int i = 0; i < floor - 1; i++) {
+        if((pipe & (1 << i)) != 0)
+            printf("│  ");
+        else
+            printf("   ");
+    }
+
+    if(floor != 0) {
+        if(prs->follow != NULL)
+            printf("├──");
+        else
+            printf("└──");
+    }
+    printf("%s", prs->name);
+    if(strlen(prs->token) != 0)
+        printf(": %s", prs->token);
+    printf("\n");
+
+    if(prs->first_son != NULL) {
+        Node* child = prs->first_son;
+        while(child != NULL) {
+            
+            unsigned long long new_pipe = pipe;
+            if(child->follow != NULL)
+                new_pipe |= 1 << floor;
+            printAST(child, floor + 1, new_pipe);
+            child = child->follow;
+        }
+    }
+}
