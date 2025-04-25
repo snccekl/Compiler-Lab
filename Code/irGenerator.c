@@ -9,13 +9,13 @@ void tProgram(Node *root) {
     dummy = root->first_son;
     while(dummy != NULL){
         if(!strcmp("FuncDecl" , dummy->name)){
-            tFunDec(dummy);
+            tFunDecl(dummy);
         }
         else if(!strcmp("StructDecl",dummy->name)){
             tStructDecl(dummy);
         }
         else if(!strcmp("VarDecl",dummy->name)){
-            tVardec(dummy);
+            tVardecl(dummy);
             
         }
         dummy = dummy->follow;
