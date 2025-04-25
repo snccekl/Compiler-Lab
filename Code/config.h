@@ -11,7 +11,7 @@
 #define PRINT_AST (DEBUG_MODE | 1)
 
 // 用于管理语义分析的插旗
-#define SEMANTIC_DEBUG_MODE (DEBUG_MODE | 0)
+#define SEMANTIC_DEBUG_MODE (DEBUG_MODE | 1)
 
 // 注：请只修改数值部分，且数值只可能为0或1
 

@@ -43,29 +43,33 @@ void repr(Operand op,FILE *file);
 void deletelastCode();
 FieldList allsearch(char *name ,int flag);
 int getSpace(Type type) ;
+
+// 为什么没有变量值？变量值可能是函数调用或者别的，直接使用value代替值会不会有问题（
+// 这个new_var我感觉不对劲，修改后再用
+Operand new_var();
 Operand new_temp();
 Operand new_label();
 Operand new_constant(int i);
 
 
-//树
+
+// 你这框架有几个搞不懂的地方
+// 首先函数定义需要插入到中间代码的，但是我找不到框架什么东西代表函数定义
+// 其次变量var定义上是存在的，只是没插入中间代码里，但是var这里单纯用char来代替感觉有点指代不明？
+
+// 树 这里用AST的节点（（（
 void tProgram(Node *root);
-// void tExtDefList(Node *node);
-// void tExtDef(Node *node);
-// Type tSpecifier(Node *node);
-// void tExtDecList(Node *node);
-// Type tFunDec(Node *node);
+
+void tFuncDecl(Node* func);
+// void tFunDec(Node *node);
 // void tCompSt(Node *node,Type spec);
 // FieldList tVarDec(Node *node,Type spec);
-// Type tStructSpecifier(Node *node);
-// void tDefList(Node *node);
+// Type tStructDecl(Node *node);
 // void tStmt(Node *node,Type spec);
 
 // void tExp(Node * node, Operand  place);
 
-// void tDef(Node *node);
-// void tDecList(Node *node,Type spec);
-// void tDec(Node *node,Type spec);
+
 // void tArgs(Node *node,Operand * arglist);
 // void tCond(Node* node,Operand label_true,Operand label_false);
 #endif

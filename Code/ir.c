@@ -256,6 +256,12 @@ FieldList allsearch(char *name ,int flag){
 
 }
 
+Operand new_var() {
+	Operand v = (Operand)malloc(sizeof(Operand_));
+	v->kind = VARIABLE_OP;
+	return v;
+}
+
 Operand new_temp(){
 	Operand t = (Operand)malloc(sizeof(Operand_));
 	t->kind = TEMPVAR_OP;
