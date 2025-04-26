@@ -50,5 +50,71 @@ void tFuncDecl(Node* func) {
         // 如果有语法块
         else if(!strcmp(prs->name, "Block"))
             tBlock(prs);
+        prs = prs->follow;
     }
+}
+
+Operand tVarDecl(Node* varDecl) {
+    // 获取变量的各种属性
+    int scope_id = varDecl->scope_id;
+    Node* ID = varDecl->first_son->follow;
+    FieldList field = search(ID->token, 0, scope_id);
+    Type type = field->type;
+
+    // 生成变量对应的operand
+    Operand var = new_var();
+    strcpy(var->u.value, ID->token);
+
+    // 如果是通过函数参数进来的，直接返回即可
+    if(!strcmp(varDecl->parent->name, "ParamList")) {
+        return var;
+    }
+
+    Node* prs = ID->follow;
+
+    // 处理数组和赋值
+    while(prs != NULL) {
+
+        // 处理数组
+        if(!strcmp(prs->name, "ArrayDecl")) {
+            tArrayDecl(prs, var);
+        }
+
+        // 处理赋值
+        if(!strcmp(prs->name, "Init")) {
+            tInit(prs, var);
+        }
+        prs = prs->follow;
+    }
+    return var;
+}
+
+// 用于梳理数组定义的，请不要在数组调用的时候用，节点名字不一样的
+void tArrayDecl(Node* arrayDecl, Operand var) {
+    
+}
+
+// 用于处理变量定义时赋值
+void tInit(Node* init, Operand var) {
+
+}
+
+void tParamList(Node* paramList) {
+    Node* Param = paramList->first_son;
+    while(Param != NULL) {
+        if(!strcmp(Param->name, "VarDecl")) {
+            // 获取参数
+            Operand param = tVarDecl(param);
+
+            // 生成PARAM_IR
+            InterCode param_ir = (InterCode)malloc(sizeof(InterCode_));
+            param_ir->kind = PARAM_IR;
+            param_ir->operands[0] = param;
+            insertCode(param_ir);
+        }
+    }
+}
+
+void tBlock(Node* block) {
+
 }

@@ -60,8 +60,16 @@ Operand new_constant(int i);
 // 树 这里用AST的节点（（（
 void tProgram(Node *root);
 
+
+Operand tVarDecl(Node* varDecl);
+void tArrayDecl(Node* arrayDecl, Operand var);
+void tInit(Node* init, Operand var);
+
 void tFuncDecl(Node* func);
-// void tFunDec(Node *node);
+void tParamList(Node* paramList);
+
+
+
 // void tCompSt(Node *node,Type spec);
 // FieldList tVarDec(Node *node,Type spec);
 // Type tStructDecl(Node *node);
