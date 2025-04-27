@@ -103,6 +103,7 @@ void printCode(char *filename) {
 	}
 	for (int i = 0; i < IRsize; i++) {
 		InterCode ir = IRList[i];
+		
 		if (ir == NULL) {
 			continue;
 		}
@@ -178,7 +179,7 @@ void printCode(char *filename) {
 			fputs("GOTO ", fp);
 			repr(ir->operands[0], fp);
 			break;
-		case IF_GOTO_IR:
+		case IF_IR:
 			fputs("IF ", fp);
 			repr(ir->operands[0], fp);
 			fputs(" ", fp);

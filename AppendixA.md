@@ -179,6 +179,19 @@ VarDecl
    ...
 ~~~
 
+如果带有赋值
+~~~
+varDec ASSIGN Exp
+~~~
+则转成
+~~~
+VarDecl
+├──Type
+├──ID
+└──Init
+   └──Exp
+~~~
+
 ## Struct
 ~~~
 StructSpecifier  : STRUCT OptTag LC DefList RC

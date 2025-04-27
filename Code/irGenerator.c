@@ -54,6 +54,10 @@ void tFuncDecl(Node* func) {
     }
 }
 
+void tStructDecl(Node* structDecl) {
+    // do nothing
+}
+
 Operand tVarDecl(Node* varDecl) {
     // 获取变量的各种属性
     int scope_id = varDecl->scope_id;
@@ -89,14 +93,31 @@ Operand tVarDecl(Node* varDecl) {
     return var;
 }
 
-// 用于梳理数组定义的，请不要在数组调用的时候用，节点名字不一样的
+// 用于处理数组定义的，请不要在数组调用的时候用，节点名字不一样的
 void tArrayDecl(Node* arrayDecl, Operand var) {
-    
+    // 获取数组大小
+    int size = 4;
+    Node* prs = arrayDecl;
+    while(prs != NULL) {
+        prs = prs->first_son;
+        size *= atoi(prs->token);
+        prs = prs->follow;
+    }
+
+    // 生成Der ir
+    InterCode dec_ir = (InterCode)malloc(sizeof(InterCode_));
+    dec_ir->kind = DEC_IR;
+    dec_ir->operands[0] = var;
+    insertCode(dec_ir);
 }
 
 // 用于处理变量定义时赋值
 void tInit(Node* init, Operand var) {
-
+    // 先得到右值
+    Operand assign_var = tExp(init->first_son);
+    
+    // 在IR中加入赋值语句
+    tTwoOperands(var, assign_var, ASSIGN_IR);
 }
 
 void tParamList(Node* paramList) {
@@ -116,5 +137,88 @@ void tParamList(Node* paramList) {
 }
 
 void tBlock(Node* block) {
+    Node* prs = block->first_son;
+    while(prs != NULL) {
+        if(!strcmp(prs->name, "VarDecl"))
+            tVarDecl(prs);
+        else if(!strcmp(prs->name, "StructDecl"))
+            tStructDecl(prs);
+        else
+            tStmt(prs);
+        prs = prs->follow;
+    }
+}
 
+void tStmt(Node* stmt) {
+    // 处理代码块
+    if(!strcmp(stmt->name, "Block")) {
+        tBlock(stmt);
+    }
+
+    // 处理返回语句
+    else if(!strcmp(stmt->name, "ReturnStmt")) {
+        Operand exp = tExp(stmt->first_son);
+
+        InterCode return_ir = (InterCode)malloc(sizeof(InterCode_));
+        return_ir->kind = RETURN_IR;
+        return_ir->operands[0] = exp;
+        insertCode(return_ir);
+    }
+
+    // 处理if语句
+    else if(!strcmp(stmt->name, "If")) {
+        // 生成label1
+        Operand label1 = new_label();
+        InterCode label1_ir = (InterCode)malloc(sizeof(InterCode_));
+        label1_ir->kind = LABEL_IR;
+        label1_ir->operands[0] = label1;
+
+        // 生成label2
+        Operand label2 = new_label();
+        InterCode label2_ir = (InterCode)malloc(sizeof(InterCode_));
+        label2_ir->kind = LABEL_IR;
+        label2_ir->operands[0] = label2;
+        
+        Node* exp = stmt->first_son;
+        Node* stmt1 = exp->follow;
+
+        // 插入ir
+        tCond(exp, label1, label2);
+        insertCode(label1_ir);
+        tStmt(stmt1);
+        
+
+        // 如果存在else语句
+        if(stmt1->follow != NULL) {
+            Node* stmt2 = stmt1->follow;
+
+            // 生成label3
+            Operand label3 = new_label();
+            InterCode label3_ir = (InterCode)malloc(sizeof(InterCode_));
+            label3_ir->kind = LABEL_IR;
+            label3_ir->operands[0] = label3;
+
+            // 生成GOTO语句
+            InterCode goto_ir = (InterCode)malloc(sizeof(InterCode_));
+            goto_ir->kind = GOTO_IR;
+            goto_ir->operands[0] = label3;
+
+            // 插入IR
+            insertCode(goto_ir);
+            insertCode(label2_ir);
+            tStmt(stmt2);
+            insert(label3_ir);
+        }
+        else
+        insertCode(label2_ir);
+
+    }
+
+    else if(!strcmp(stmt->name, "While")) {
+
+    }
+
+    else {
+        tExp(stmt);
+    }
 }

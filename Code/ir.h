@@ -29,7 +29,7 @@ typedef struct InterCode_ {
 			ADDR_IR3,
             ADDR_VALUE_IR, // x := *y 
 			MEMORY_IR, //*x := y 
-            GOTO_IR, IF_GOTO_IR, RETURN_IR, DEC_IR, ARG_IR, CALL_IR, PARAM_IR, READ_IR, WRITE_IR,DEBUG_IR
+            GOTO_IR, IF_IR, RETURN_IR, DEC_IR, ARG_IR, CALL_IR, PARAM_IR, READ_IR, WRITE_IR,DEBUG_IR
 	}kind;
     Operand operands[3];
     int size;
