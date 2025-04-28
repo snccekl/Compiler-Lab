@@ -29,7 +29,7 @@ typedef struct InterCode_ {
 			ADDR_IR3,
             ADDR_VALUE_IR, // x := *y 
 			MEMORY_IR, //*x := y 
-            GOTO_IR, IF_IR, RETURN_IR, DEC_IR, ARG_IR, CALL_IR, PARAM_IR, READ_IR, WRITE_IR,DEBUG_IR
+            GOTO_IR, IF_GOTO_IR, RETURN_IR, DEC_IR, ARG_IR, CALL_IR, PARAM_IR, READ_IR, WRITE_IR,DEBUG_IR
 	}kind;
     Operand operands[3];
     int size;
@@ -41,7 +41,6 @@ void insertCode(InterCode ir);
 void printCode(char *filename);
 void repr(Operand op,FILE *file);
 void deletelastCode();
-FieldList allsearch(char *name ,int flag);
 int getSpace(Type type) ;
 
 // 为什么没有变量值？变量值可能是函数调用或者别的，直接使用value代替值会不会有问题（
@@ -73,17 +72,7 @@ void tBlock(Node* block);
 
 void tCond(Node* cond, Operand label_true, Operand label_false);
 
-Operand tExp(Node* exp);
+void tExp(Node* exp, Operand place);
 void tArgs(Node* args);
 
-// void tCompSt(Node *node,Type spec);
-// FieldList tVarDec(Node *node,Type spec);
-// Type tStructDecl(Node *node);
-// void tStmt(Node *node,Type spec);
-
-// void tExp(Node * node, Operand  place);
-
-
-// void tArgs(Node *node,Operand * arglist);
-// void tCond(Node* node,Operand label_true,Operand label_false);
 #endif

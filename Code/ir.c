@@ -179,7 +179,7 @@ void printCode(char *filename) {
 			fputs("GOTO ", fp);
 			repr(ir->operands[0], fp);
 			break;
-		case IF_IR:
+		case IF_GOTO_IR:
 			fputs("IF ", fp);
 			repr(ir->operands[0], fp);
 			fputs(" ", fp);
@@ -252,10 +252,6 @@ int getSpace(Type type) {
 	return 1;
 }
 
-//这个search应该和之前差不多，你看看能不能补一下
-FieldList allsearch(char *name ,int flag){
-
-}
 
 Operand new_var() {
 	Operand v = (Operand)malloc(sizeof(Operand_));
@@ -283,27 +279,5 @@ Operand new_constant(int i){
 	sprintf(t->u.value ,"%d",i);
 	return t;
 }
-
-// 你自己看看吧
-// void tProgram(Node *root){
-//     if(root == NULL){
-//         return;
-//     }
-//     Node* dummy;
-//     dummy = root->first_son;
-//     while(dummy != NULL){
-//         if(!strcmp("FuncDecl" , dummy->name)){
-//             tFunDec(dummy);
-//         }
-//         else if(!strcmp("StructDecl",dummy->name)){
-//             tStructDecl(dummy);
-//         }
-//         else if(!strcmp("VarDecl",dummy->name)){
-//             Type spec = tVardec(dummy);
-            
-//         }
-//         dummy = dummy->follow;
-//     }
-// }
 
 
