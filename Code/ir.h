@@ -68,7 +68,13 @@ void tInit(Node* init, Operand var);
 void tFuncDecl(Node* func);
 void tParamList(Node* paramList);
 
+void tStmt(Node* stmt);
+void tBlock(Node* block);
 
+void tCond(Node* cond, Operand label_true, Operand label_false);
+
+Operand tExp(Node* exp);
+void tArgs(Node* args);
 
 // void tCompSt(Node *node,Type spec);
 // FieldList tVarDec(Node *node,Type spec);

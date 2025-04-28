@@ -215,10 +215,67 @@ void tStmt(Node* stmt) {
     }
 
     else if(!strcmp(stmt->name, "While")) {
+        // 生成label1
+        Operand label1 = new_label();
+        InterCode label1_ir = (InterCode)malloc(sizeof(InterCode_));
+        label1_ir->kind = LABEL_IR;
+        label1_ir->operands[0] = label1;
 
+        // 生成label2
+        Operand label2 = new_label();
+        InterCode label2_ir = (InterCode)malloc(sizeof(InterCode_));
+        label2_ir->kind = LABEL_IR;
+        label2_ir->operands[0] = label2;
+
+        // 生成label3
+        Operand label3 = new_label();
+        InterCode label3_ir = (InterCode)malloc(sizeof(InterCode_));
+        label3_ir->kind = LABEL_IR;
+        label3_ir->operands[0] = label3;
+
+        // 生成goto_ir
+        InterCode goto_ir = (InterCode)malloc(sizeof(InterCode_));
+        goto_ir->kind = GOTO_IR;
+        goto_ir->operands[0] = label1;
+
+        // 插入ir
+        Node* cond = stmt->first_son;
+        Node* stmt1 = cond->follow;
+        
+        insertCode(label1_ir);
+        tCond(cond, label2, label3);
+        insertCode(label2_ir);
+        tStmt(stmt1);
+        insertCode(goto_ir);
+        insertCode(label3_ir);
     }
 
     else {
         tExp(stmt);
+    }
+}
+
+
+void tCond(Node* cond, Operand label_true, Operand label_false) {
+    // TODO
+}
+
+Operand tExp(Node* exp) {
+    // TODO
+    return NULL;
+}
+
+
+void tArgs(Node* args) {
+    Node* prs = args->first_son;
+    while(prs != NULL) {
+        Operand arg = tExp(prs);
+
+        InterCode arg_ir = (InterCode)malloc(sizeof(InterCode_));
+        arg_ir->kind = ARG_IR;
+        arg_ir->operands[0] = arg;
+        insertCode(arg_ir);
+
+        prs = prs->follow;
     }
 }
