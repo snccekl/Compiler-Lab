@@ -30,10 +30,8 @@ void tFuncDecl(Node* func) {
     int scope_id = func->scope_id;
     Node* ID = func->first_son->follow;
     FieldList func_field = search(ID->token, 2, scope_id);
-
-    strcmp(func_op->u.value, ID->token);
+    strcpy(func_op->u.value, ID->token);
     // func->type = func_field->type;
-
     // 生成FUNCTION_IR, 这里的size怎么处理看一看 (当然也可能不处理)
     InterCode func_ir = (InterCode)malloc(sizeof(InterCode_));
     func_ir->kind = FUNCTION_IR;
@@ -162,7 +160,7 @@ void tStmt(Node* stmt) {
 
     // 处理返回语句
     else if(!strcmp(stmt->name, "ReturnStmt")) {
-        Operand exp;
+        Operand exp = new_temp();
         tExp(stmt->first_son,exp);
         //Operand exp = tExp(stmt->first_son);
         InterCode return_ir = (InterCode)malloc(sizeof(InterCode_));
@@ -360,7 +358,7 @@ void tExp(Node* node, Operand place) {
     // code1 = translate_Exp(Exp2, sym_table, t1)
     // code2 = [variable.name := t1] +4 [place := variable.name]
     // return code1 + code2
-    if (node->num_child == 2 && strcmp(node->name, "ASSIGNOP") == 0){   
+    if (strcmp(node->name, "ASSIGNOP") == 0){   
 		if(strcmp(node->first_son->name, "ID") == 0){
 			FieldList f = search(node->first_son->token,0,node->first_son->scope_id);
 			Operand right = new_temp();
@@ -410,8 +408,7 @@ void tExp(Node* node, Operand place) {
 		}
     }
     //Exp AND|OR|RELOP Exp
-    if (node->num_child == 2 &&
-       ( strcmp(node->name, "AND") == 0 | strcmp(node->name, "OR") == 0 
+    if (( strcmp(node->name, "AND") == 0 | strcmp(node->name, "OR") == 0 
        |strcmp(node->name, "RELOP") == 0 )){
         // label1 = new_label()
         // label2 = new_label()
@@ -451,10 +448,7 @@ void tExp(Node* node, Operand place) {
     //         | Exp MINUS Exp     a-b
     //         | Exp STAR Exp      a*b
     //         | Exp DIV Exp       a/b
-    if (node->num_child == 2 &&(
-(strcmp(node->name, "PLUS") == 0) || (strcmp(node->name, "MINUS") == 0) || (strcmp(node->name, "STAR") == 0) || (strcmp(node->name, "DIV") == 0))
-    )
-    {
+    if (((strcmp(node->name, "PLUS") == 0) || (strcmp(node->name, "MINUS") == 0) || (strcmp(node->name, "STAR") == 0) || (strcmp(node->name, "DIV") == 0))){
 		Node *Exp1 = node->first_son;
 		Node *Exp2 = node->first_son->follow;
 
@@ -575,7 +569,7 @@ void tExp(Node* node, Operand place) {
         //找函数名
         FieldList field = search(node->first_son->token,1,node->first_son->scope_id);
         Type rtype = field->type;
-		if (node->num_child == 1) {
+		if (node->first_son->follow == NULL) {
             // function = lookup(sym_table, ID)
             // if (function.name == “read”) return [READ place]
             // return [place := CALL function.name]
@@ -602,7 +596,7 @@ void tExp(Node* node, Operand place) {
 				insertCode(callIR);
 			}
 		}
-        else if(node->num_child == 2) {
+        else{
             // function = lookup(sym_table, ID)
             // arg_list = NULL
             // code1 = translate_Args(Args, sym_table, arg_list)
@@ -644,8 +638,7 @@ void tExp(Node* node, Operand place) {
     }
 	//         | Exp LB Exp RB     a[b]  左值
 	//(bodies[o_cnt].points[i_cnt]).x 
-    if ( node->num_child == 2 &&
-        ( strcmp(node->name, "ArrayAccess") == 0)){
+    if (( strcmp(node->name, "ArrayAccess") == 0)){
 		//t1 数组首地址 最里层是ID t2 整型index
 		Operand t1 = new_temp();
 		Operand t2 = new_temp();
