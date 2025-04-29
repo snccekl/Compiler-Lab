@@ -488,8 +488,8 @@ void tExp(Node* node, Operand place) {
     //         | LP Exp RP         (a)
     //         | MINUS Exp         -a
     //         | NOT Exp           ~a
-    if ((strcmp(node->first_son->name, "MINUS") == 0) || (strcmp(node->first_son->name, "NOT") == 0) ){
-		if(strcmp(node->first_son->name, "NOT") == 0){
+    if ((strcmp(node->name, "MINUS") == 0) || (strcmp(node->name, "NOT") == 0) ){
+		if(strcmp(node->name, "NOT") == 0){
             Operand label1 = new_label();
             Operand label2 = new_label();
             InterCode code0 = (InterCode)malloc(sizeof(InterCode_));
@@ -516,7 +516,7 @@ void tExp(Node* node, Operand place) {
             insertCode(l2);
             return;
 		}
-		else if((strcmp(node->first_son->name, "MINUS") == 0)){
+		else if((strcmp(node->name, "MINUS") == 0)){
             // t1 = new_temp()
             // code1 = translate_Exp(Exp1, sym_table, t1)
             // code2 = [place := #0 - t1]
