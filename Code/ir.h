@@ -14,7 +14,7 @@ typedef struct Operand_ {//操作数
 	union {
 		int var_no;		        //临时变量t
 		int label_no;		    //标号l
-		char value[32];		   //值 		
+		char value[256];		   //值 		
 	}u;
 	//int tempint;
 	Type type;
@@ -33,7 +33,7 @@ typedef struct InterCode_ {
 	}kind;
     Operand operands[3];
     int size;
-    char relop[32];
+    char relop[256];
 }InterCode_;
 
 void initIRList();
@@ -58,7 +58,7 @@ Operand new_constant(int i);
 
 // 树 这里用AST的节点（（（
 void tProgram(Node *root);
-
+void tStructDecl(Node* structDecl);
 
 Operand tVarDecl(Node* varDecl);
 void tArrayDecl(Node* arrayDecl, Operand var);

@@ -1,5 +1,5 @@
 #include "ir.h"
-int tnum = 1;	//t 临时变量
+int tmp_num = 1;	//t 临时变量
 // 你自己看看吧
 void tProgram(Node *root) {
     if(root == NULL){
@@ -9,13 +9,13 @@ void tProgram(Node *root) {
     dummy = root->first_son;
     while(dummy != NULL){
         if(!strcmp("FuncDecl" , dummy->name)){
-            tFunDecl(dummy);
+            tFuncDecl(dummy);
         }
         else if(!strcmp("StructDecl",dummy->name)){
             tStructDecl(dummy);
         }
         else if(!strcmp("VarDecl",dummy->name)){
-            tVardecl(dummy);
+            tVarDecl(dummy);
             
         }
         dummy = dummy->follow;
@@ -32,7 +32,7 @@ void tFuncDecl(Node* func) {
     FieldList func_field = search(ID->token, 2, scope_id);
 
     strcmp(func_op->u.value, ID->token);
-    func->type = func_field->type;
+    // func->type = func_field->type;
 
     // 生成FUNCTION_IR, 这里的size怎么处理看一看 (当然也可能不处理)
     InterCode func_ir = (InterCode)malloc(sizeof(InterCode_));
@@ -114,12 +114,14 @@ void tArrayDecl(Node* arrayDecl, Operand var) {
 // 用于处理变量定义时赋值
 void tInit(Node* init, Operand var) {
     // 先得到右值
-    Operand assign_var = NULL;
+    Operand assign_var = new_temp();
     tExp(init->first_son,assign_var);
-    //Operand assign_var = tExp(init->first_son);
-    
-    // 在IR中加入赋值语句
-    tTwoOperands(var, assign_var, ASSIGN_IR);
+
+    InterCode assign_ir = (InterCode)malloc(sizeof(InterCode_));
+    assign_ir->kind = ASSIGN_IR;
+    assign_ir->operands[0] = var;
+    assign_ir->operands[1] = assign_var;
+    insertCode(assign_ir);
 }
 
 void tParamList(Node* paramList) {
@@ -127,7 +129,7 @@ void tParamList(Node* paramList) {
     while(Param != NULL) {
         if(!strcmp(Param->name, "VarDecl")) {
             // 获取参数
-            Operand param = tVarDecl(param);
+            Operand param = tVarDecl(Param);
 
             // 生成PARAM_IR
             InterCode param_ir = (InterCode)malloc(sizeof(InterCode_));
@@ -135,6 +137,7 @@ void tParamList(Node* paramList) {
             param_ir->operands[0] = param;
             insertCode(param_ir);
         }
+        Param = Param->follow;
     }
 }
 
@@ -210,7 +213,7 @@ void tStmt(Node* stmt) {
             insertCode(goto_ir);
             insertCode(label2_ir);
             tStmt(stmt2);
-            insert(label3_ir);
+            insertCode(label3_ir);
         }
         else
         insertCode(label2_ir);
@@ -580,7 +583,7 @@ void tExp(Node* node, Operand place) {
 			intIR->operands[1] = intOp;
 			place->kind = TEMPVAR_OP;
 			
-            place->u.var_no = tnum++;
+            place->u.var_no = tmp_num++;
 
 			intIR->operands[0] = place;
 			insertCode(intIR);
@@ -602,7 +605,7 @@ void tExp(Node* node, Operand place) {
 					InterCode readIR = (InterCode)malloc(sizeof(InterCode_));
 					readIR->kind = READ_IR;
 					place->kind = TEMPVAR_OP;
-					place->u.var_no = tnum++;
+					place->u.var_no = tmp_num++;
 					readIR->operands[0] = place;
 					insertCode(readIR);
 				}
@@ -616,7 +619,7 @@ void tExp(Node* node, Operand place) {
 				callIR->operands[0] = place;
 				callIR->operands[1] = funcOp;
 				place->kind = TEMPVAR_OP;
-				place->u.var_no = tnum++;
+				place->u.var_no = tmp_num++;
 				insertCode(callIR);
 			}
 		}

@@ -53,7 +53,7 @@ void repr(Operand op, FILE *fp) {
 		fputs("t0	", fp);
 		return;
 	}
-	char str[50];
+	char str[257];
 	memset(str, 0, sizeof(str));
 	switch (op->kind) {
 

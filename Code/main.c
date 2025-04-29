@@ -3,6 +3,7 @@
 #include "Semantic.h"
 #include "tree.h"
 #include "config.h"
+#include "ir.h"
 
 void perror(const char *__s);
 int yyrestart();
@@ -39,6 +40,10 @@ int main(int argc, char** argv) {
 
         if(PRINT_AST)
             printAST(ast_root, 0, 0);
+
+        initIRList();
+        tProgram(ast_root);
+        printCode("stdout");
     }
     return 0;
 }
