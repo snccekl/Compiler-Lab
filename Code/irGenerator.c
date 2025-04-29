@@ -272,12 +272,12 @@ void tCond(Node* node, Operand label_true, Operand label_false) {
         // op = get_relop(RELOP);
         // code3 = [IF t1 op t2 GOTO label_true]
         // return code1 + code2 + code3 + [GOTO label_false]
-        if(node->num_child == 3 && strcmp(node->first_son->follow->name, "RELOP") == 0){
+        if(node->num_child == 2 && strcmp(node->name, "RELOP") == 0){
             Operand t1 = new_temp();
             Operand t2 = new_temp();
             tExp(node->first_son,t1);//code1
-            tExp(node->first_son->follow->follow,t2);//code2
-            char * op = node->first_son->follow->token;
+            tExp(node->first_son->follow,t2);//code2
+            char * op = node->token;
             InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
             code3->kind = IF_GOTO_IR;
             code3->operands[0] = t1;
@@ -302,28 +302,28 @@ void tCond(Node* node, Operand label_true, Operand label_false) {
         // code1 = translate_Cond(Exp1, label1, label_false, sym_table)
         // code2 = translate_Cond(Exp2, label_true, label_false, sym_table)
         // return code1 + [LABEL label1] + code2
-        else if(node->num_child == 3 && strcmp(node->first_son->follow->name, "AND") == 0){
+        else if(node->num_child == 2 && strcmp(node->name, "AND") == 0){
             Operand label1 = new_label();
             tCond(node->first_son,label1,label_false);
             InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
             code3->kind = LABEL_IR;
             code3->operands[0] = label1;
             insertCode(code3);
-            tCond(node->first_son->follow->follow,label_true,label_false);
+            tCond(node->first_son->follow,label_true,label_false);
         }
         //Exp1 OR Exp2
         // label1 = new_label()
         // code1 = translate_Cond(Exp1, label_true, label1, sym_table)
         // code2 = translate_Cond(Exp2, label_true, label_false, sym_table)
         // return code1 + [LABEL label1] + code2
-        else if(node->num_child == 3 && strcmp(node->first_son->follow->name, "OR") == 0){
+        else if(node->num_child == 2 && strcmp(node->name, "OR") == 0){
             Operand label1 = new_label();
             tCond(node->first_son,label_true,label1);
             InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
             code3->kind = LABEL_IR;
             code3->operands[0] = label1;
             insertCode(code3);
-            tCond(node->first_son->follow->follow,label_true,label_false);
+            tCond(node->first_son->follow,label_true,label_false);
         }
         else{
             // t1 = new_temp()
@@ -331,7 +331,7 @@ void tCond(Node* node, Operand label_true, Operand label_false) {
             // code2 = [IF t1 != #0 GOTO label_true]
             // return code1 + code2 + [GOTO label_false]
             Operand t1 = new_temp();
-            tExp(node,t1);
+            tExp(node->first_son,t1);
             InterCode code2 = (InterCode)malloc(sizeof(InterCode_));
             code2->kind = IF_GOTO_IR;
             code2->operands[0] = t1;
@@ -360,11 +360,11 @@ void tExp(Node* node, Operand place) {
     // code1 = translate_Exp(Exp2, sym_table, t1)
     // code2 = [variable.name := t1] +4 [place := variable.name]
     // return code1 + code2
-    if (node->num_child ==3 && strcmp(node->first_son->follow->name, "ASSIGNOP") == 0){   
-		if(strcmp(node->first_son->first_son->name, "ID") == 0){
-			FieldList f = search(node->first_son->first_son->token,0,node->first_son->first_son->scope_id);
+    if (node->num_child == 2 && strcmp(node->name, "ASSIGNOP") == 0){   
+		if(strcmp(node->first_son->name, "ID") == 0){
+			FieldList f = search(node->first_son->token,0,node->first_son->scope_id);
 			Operand right = new_temp();
-			tExp(node->first_son->follow->follow,right);
+			tExp(node->first_son->follow,right);
 			Operand left = (Operand)malloc(sizeof(Operand_));
 			left->kind = VARIABLE_OP;
 			strcpy(left->u.value,f->name);
@@ -386,31 +386,14 @@ void tExp(Node* node, Operand place) {
 		}
         //Exp DOT ID
 		else if(strcmp(node->first_son->first_son->follow->name, "DOT") == 0){ 
-			Operand left = new_temp();
-			tExp(node->first_son,left);
-			Operand right = new_temp();
-			tExp(node->first_son->follow->follow,right);
-
-			InterCode code2 = (InterCode)malloc(sizeof(InterCode_));
-			code2->kind = ASSIGN_IR;
-			code2->operands[0] = left;
-			code2->operands[1] = right; 
-			insertCode(code2);
-
-			if(place != NULL){
-				InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
-				code3->kind = ASSIGN_IR;
-				code3->operands[0] = place;   //*x= y
-				code3->operands[1] = right;
-				insertCode(code3);
-			}
+			// 无结构体
 		}
         //Exp LB Exp RB
 		else if (strcmp(node->first_son->first_son->follow->name, "LB") == 0){
 			Operand left = new_temp();
 			tExp(node->first_son,left);
 			Operand right = new_temp();
-			tExp(node->first_son->follow->follow,right);
+			tExp(node->first_son->follow,right);
 
 			InterCode code2 = (InterCode)malloc(sizeof(InterCode_));
 			code2->kind = ASSIGN_IR;
@@ -427,10 +410,9 @@ void tExp(Node* node, Operand place) {
 		}
     }
     //Exp AND|OR|RELOP Exp
-    if (node->num_child ==3 &&
-       ( strcmp(node->first_son->follow->name, "AND") == 0 | strcmp(node->first_son->follow->name, "OR") == 0 
-       |strcmp(node->first_son->follow->name, "RELOP") == 0 ))
-    {
+    if (node->num_child == 2 &&
+       ( strcmp(node->name, "AND") == 0 | strcmp(node->name, "OR") == 0 
+       |strcmp(node->name, "RELOP") == 0 )){
         // label1 = new_label()
         // label2 = new_label()
         // code0 = [place := #0]
@@ -469,12 +451,12 @@ void tExp(Node* node, Operand place) {
     //         | Exp MINUS Exp     a-b
     //         | Exp STAR Exp      a*b
     //         | Exp DIV Exp       a/b
-    if (node->num_child ==3 &&(
-(strcmp(node->first_son->follow->name, "PLUS") == 0) || (strcmp(node->first_son->follow->name, "MINUS") == 0) || (strcmp(node->first_son->follow->name, "STAR") == 0) || (strcmp(node->first_son->follow->name, "DIV") == 0))
+    if (node->num_child == 2 &&(
+(strcmp(node->name, "PLUS") == 0) || (strcmp(node->name, "MINUS") == 0) || (strcmp(node->name, "STAR") == 0) || (strcmp(node->name, "DIV") == 0))
     )
     {
 		Node *Exp1 = node->first_son;
-		Node *Exp2 = node->first_son->follow->follow;
+		Node *Exp2 = node->first_son->follow;
 
         // t1 = new_temp()
         // t2 = new_temp()
@@ -487,11 +469,11 @@ void tExp(Node* node, Operand place) {
 		tExp(Exp1,t1);
 		tExp(Exp2,t2);
 		InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
-		if(strcmp(node->first_son->follow->name, "PLUS") == 0)
+		if(strcmp(node->name, "PLUS") == 0)
 			code3->kind = PLUS_IR;
-		else if(strcmp(node->first_son->follow->name, "MINUS") == 0)
+		else if(strcmp(node->name, "MINUS") == 0)
 			code3->kind = MINUS_IR;
-		else if(strcmp(node->first_son->follow->name, "STAR") == 0)
+		else if(strcmp(node->name, "STAR") == 0)
 			code3->kind = STAR_IR;
 		else 
 			code3->kind = DIV_IR;
@@ -502,10 +484,11 @@ void tExp(Node* node, Operand place) {
 
 		return;
     }
+    // 这里不知道这个(a)的处理对不对
     //         | LP Exp RP         (a)
     //         | MINUS Exp         -a
     //         | NOT Exp           ~a
-    if ((strcmp(node->first_son->name, "LP") == 0) || (strcmp(node->first_son->name, "MINUS") == 0) || (strcmp(node->first_son->name, "NOT") == 0) ){
+    if ((strcmp(node->first_son->name, "MINUS") == 0) || (strcmp(node->first_son->name, "NOT") == 0) ){
 		if(strcmp(node->first_son->name, "NOT") == 0){
             Operand label1 = new_label();
             Operand label2 = new_label();
@@ -533,10 +516,6 @@ void tExp(Node* node, Operand place) {
             insertCode(l2);
             return;
 		}
-		else if((strcmp(node->first_son->name, "LP") == 0) ){
-            //(Exp)
-			tExp(node->first_son->follow,place);
-		}
 		else if((strcmp(node->first_son->name, "MINUS") == 0)){
             // t1 = new_temp()
             // code1 = translate_Exp(Exp1, sym_table, t1)
@@ -557,19 +536,19 @@ void tExp(Node* node, Operand place) {
     //         | ID                a     左值
     //         | INT               1
     //         | FLOAT             1.0
-    if(node->num_child == 1 && (strcmp(node->first_son->name, "ID") == 0) ){
+    if(strcmp(node->name, "ID") == 0){
         //ID
         //找变量 不会增加中间代码 只是填充内容然后让外面的增加
-		FieldList f = search(node->first_son->token,0,node->first_son->scope_id);
+		FieldList f = search(node->token,0,node->scope_id);
 		if (place != NULL) {
             place->kind = VARIABLE_OP;
             place->type = f->type;//满足(f->type->kind == ARRAY)   就要赋值type 一起赋值了
-            strcpy(place->u.value, node->first_son->token);
+            strcpy(place->u.value, node->token);
 		}
 		return;
     }
     //INT
-    if(strcmp(node->first_son->name, "INT") == 0){
+    if(strcmp(node->name, "INT") == 0){
         Type t = (Type) malloc (sizeof(Type_));
         t->kind = BASIC;
         t->u.basic = INT_TYPE;
@@ -579,7 +558,7 @@ void tExp(Node* node, Operand place) {
 			intIR->kind = ASSIGN_IR;
 			Operand intOp = (Operand)malloc(sizeof(Operand_));
 			intOp->kind = CONSTANT_OP;
-			strcpy(intOp->u.value, node->first_son->token);
+			strcpy(intOp->u.value, node->token);
 			intIR->operands[1] = intOp;
 			place->kind = TEMPVAR_OP;
 			
@@ -590,13 +569,13 @@ void tExp(Node* node, Operand place) {
 		}
 		return;
     }
-    if(strcmp(node->first_son->name, "ID") == 0){
+    if(strcmp(node->name, "FuncCall") == 0){
         //         | ID LP Args RP     a(b) // 函数调用
         //         | ID LP RP          a()
         //找函数名
         FieldList field = search(node->first_son->token,1,node->first_son->scope_id);
         Type rtype = field->type;
-		if (strcmp(node->first_son->follow->follow->name, "RP") == 0) {
+		if (node->num_child == 1) {
             // function = lookup(sym_table, ID)
             // if (function.name == “read”) return [READ place]
             // return [place := CALL function.name]
@@ -623,7 +602,7 @@ void tExp(Node* node, Operand place) {
 				insertCode(callIR);
 			}
 		}
-        if(strcmp(node->first_son->follow->follow->name, "Args") == 0){
+        else if(node->num_child == 2) {
             // function = lookup(sym_table, ID)
             // arg_list = NULL
             // code1 = translate_Args(Args, sym_table, arg_list)
@@ -631,7 +610,7 @@ void tExp(Node* node, Operand place) {
 			if (strcmp("write", node->first_son->token) == 0) {
 				Operand argOp = (Operand)malloc(sizeof(Operand_));
 				//只有一个参数
-				Node *exp = node->first_son->follow->follow->first_son;//Args -> exp
+				Node *exp = node->first_son->follow;//Args -> exp
 				if (strcmp(exp->first_son->name, "INT") == 0) { //code1
 					tExp(exp, NULL);
 					argOp->kind = CONSTANT_OP;
@@ -657,7 +636,7 @@ void tExp(Node* node, Operand place) {
 				}
 			}
 			else{
-                tArgs(node->first_son->follow->follow);
+                tArgs(node->first_son->follow);
 			}
 
         }
@@ -665,15 +644,14 @@ void tExp(Node* node, Operand place) {
     }
 	//         | Exp LB Exp RB     a[b]  左值
 	//(bodies[o_cnt].points[i_cnt]).x 
-    if ( node->num_child ==4 &&
-        ( strcmp(node->first_son->follow->name, "LB") == 0)){
+    if ( node->num_child == 2 &&
+        ( strcmp(node->name, "ArrayAccess") == 0)){
 		//t1 数组首地址 最里层是ID t2 整型index
 		Operand t1 = new_temp();
 		Operand t2 = new_temp();
 		Operand t3 = new_temp();
-		//printf("%s",node->child[0]->child[0]->yytext);
 		tExp(node->first_son,t1);//code1
-		tExp(node->first_son->follow->follow,t2);//code2
+		tExp(node->first_son->follow,t2);//code2
 		
 		int size = getSpace(t1->type->u.array.elem);
 		InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
