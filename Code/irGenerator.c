@@ -270,7 +270,7 @@ void tCond(Node* node, Operand label_true, Operand label_false) {
         // op = get_relop(RELOP);
         // code3 = [IF t1 op t2 GOTO label_true]
         // return code1 + code2 + code3 + [GOTO label_false]
-        if(node->num_child == 2 && strcmp(node->name, "RELOP") == 0){
+        if(strcmp(node->name, "RELOP") == 0){
             Operand t1 = new_temp();
             Operand t2 = new_temp();
             tExp(node->first_son,t1);//code1
@@ -291,7 +291,7 @@ void tCond(Node* node, Operand label_true, Operand label_false) {
         }
         //NOT Exp1
         //translate_Cond(Exp1, label_false, label_true, sym_table)
-        else if (node->num_child == 2 && strcmp(node->first_son->name, "NOT") == 0){
+        else if (strcmp(node->first_son->name, "NOT") == 0){
             Node* exp1 = node->first_son->follow;
             tCond(exp1,label_false,label_true);
         }
@@ -300,7 +300,7 @@ void tCond(Node* node, Operand label_true, Operand label_false) {
         // code1 = translate_Cond(Exp1, label1, label_false, sym_table)
         // code2 = translate_Cond(Exp2, label_true, label_false, sym_table)
         // return code1 + [LABEL label1] + code2
-        else if(node->num_child == 2 && strcmp(node->name, "AND") == 0){
+        else if(strcmp(node->name, "AND") == 0){
             Operand label1 = new_label();
             tCond(node->first_son,label1,label_false);
             InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
@@ -314,7 +314,7 @@ void tCond(Node* node, Operand label_true, Operand label_false) {
         // code1 = translate_Cond(Exp1, label_true, label1, sym_table)
         // code2 = translate_Cond(Exp2, label_true, label_false, sym_table)
         // return code1 + [LABEL label1] + code2
-        else if(node->num_child == 2 && strcmp(node->name, "OR") == 0){
+        else if(strcmp(node->name, "OR") == 0){
             Operand label1 = new_label();
             tCond(node->first_son,label_true,label1);
             InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
