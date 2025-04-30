@@ -39,7 +39,7 @@ temp41 := temp40 * #8
 temp37 := &z + temp41
 temp43 := i * #4
 temp44 := temp37 + temp43
-ARG op
+ARG &op
 temp47 := CALL add
 *temp44 := temp47
 temp51 := #0

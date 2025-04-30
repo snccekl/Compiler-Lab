@@ -648,10 +648,14 @@ void tExp(Node* node, Operand place) {
 				while(1){	
 					Operand t1 = new_temp();
 					tExp(args->first_son,t1);
-					argslist[i++] = t1; 
-					if(args->first_son->follow != NULL)
+
+                    if(t1->type->kind == ARRAY)
+                        t1->kind = QU_ADDR_OP;
+
+                    argslist[i++] = t1;
+					if(args->follow != NULL)
 					{
-						args = args->first_son->follow;
+						args = args->follow;
 					}
 					else{
 						break;
