@@ -707,7 +707,10 @@ void tExp(Node* node, Operand place) {
 		if(t1->type->u.array.elem->kind == ARRAY){	
             //(bodies[o_cnt].points[i_cnt].x) 
 			InterCode code4 = (InterCode)malloc(sizeof(InterCode_));
-			code4->kind = ADDR_IR3;
+            if(!strcmp(node->first_son->name, "ID"))
+			    code4->kind = ADDR_IR3;
+            else
+            code4->kind = PLUS_IR;
 			place->type = t1->type->u.array.elem;
 			code4->operands[0] = place;
 			code4->operands[1] = t1;
