@@ -536,6 +536,20 @@ void tExp(Node* node, Operand place) {
         //ID
         //找变量 不会增加中间代码 只是填充内容然后让外面的增加
 		FieldList f = search(node->token,0,node->scope_id);
+        // if(f->type->kind == ARRAY) {
+        //     printf("name: %s", f->name);
+            
+        //     Type prs = f->type;
+        //     while(prs != NULL) {
+        //         if(prs->kind == ARRAY)
+        //             printf("[%d]", prs->u.array.size);
+        //         else
+        //             break;
+        //         prs = prs->u.array.elem;
+        //     }
+        //     printf("\n");
+        // }
+
 		if (place != NULL) {
             place->kind = VARIABLE_OP;
             place->type = f->type;//满足(f->type->kind == ARRAY)   就要赋值type 一起赋值了

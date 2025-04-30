@@ -351,15 +351,28 @@ FieldList VarDec(Node *type,Type spec) {
         FieldList field = VarDec(first, spec);
 
         Node* size_node = first->follow->follow;
-        int size = atoi(size_node->name);
+        int size = atoi(size_node->token);
 
         Type array_type = (Type)malloc(sizeof(Type_));
         array_type->kind = ARRAY;
-
         array_type->u.array.size = size;
-        array_type->u.array.elem = field->type;
 
-        field->type = array_type;
+        Type prs_type = field->type;
+        
+        // 下列步骤是在field和spec中插入array类型，从顶到底添加
+        if(prs_type->kind != ARRAY) {
+            
+            array_type->u.array.elem = field->type;
+            field->type = array_type;
+        }
+        else {
+            while(prs_type->u.array.elem->kind == ARRAY) {
+                prs_type = prs_type->u.array.elem;
+            }
+            array_type->u.array.elem = prs_type->u.array.elem;
+            prs_type->u.array.elem = array_type;
+        }
+
         return field;
     }
     return NULL;

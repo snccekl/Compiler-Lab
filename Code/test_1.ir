@@ -35,7 +35,7 @@ j := temp26
 GOTO label4
 LABEL label6 : 
 temp8 := #0
-temp33 := temp8 * #0
+temp33 := temp8 * #8
 temp30 := &z + temp33
 temp35 := i * #4
 temp36 := &temp30 + temp35
@@ -43,7 +43,7 @@ ARG op
 temp9 := CALL add
 *temp36 := temp9
 temp10 := #0
-temp42 := temp10 * #0
+temp42 := temp10 * #8
 temp39 := &z + temp42
 temp44 := i * #4
 temp45 := &temp39 + temp44
