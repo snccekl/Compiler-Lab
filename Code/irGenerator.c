@@ -598,21 +598,18 @@ void tExp(Node* node, Operand place) {
 			}
 		}
         else{
-            // function = lookup(sym_table, ID)
-            // arg_list = NULL
-            // code1 = translate_Args(Args, sym_table, arg_list)
-            // if (function.name == “write”) return code1 + [WRITE arg_list[1]] + [place := #0]
 			if (strcmp("write", node->first_son->token) == 0) {
 				Operand argOp = (Operand)malloc(sizeof(Operand_));
 				//只有一个参数
 				Node *exp = node->first_son->follow;//Args -> exp
-				if (strcmp(exp->first_son->name, "INT") == 0) { //code1
+                if (strcmp(exp->first_son->name, "INT") == 0) { //code1
 					tExp(exp, NULL);
 					argOp->kind = CONSTANT_OP;
 					sprintf(argOp->u.value, "%s", exp->first_son->token);
 				}
 				else {
 					argOp->kind = TEMPVAR_OP;
+                    exp = exp->first_son;
 					tExp(exp, argOp);
 				}
 				InterCode writeIR = (InterCode)malloc(sizeof(InterCode_));
@@ -631,7 +628,45 @@ void tExp(Node* node, Operand place) {
 				}
 			}
 			else{
-                tArgs(node->first_son->follow);
+                Node * args = node->first_son->follow;
+				Operand* argslist = (Operand*)malloc(50* sizeof(Operand) );
+				int i =0;
+				while(1){	
+					Operand t1 = new_temp();
+					tExp(args->first_son,t1);
+					argslist[i++] = t1; 
+					if(args->first_son->follow != NULL)
+					{
+						args = args->first_son->follow;
+					}
+					else{
+						break;
+					}
+				}
+				for(int j=0;j<i;j++){
+					InterCode code2 =(InterCode)malloc(sizeof(InterCode_));
+					code2->kind = ARG_IR;
+					code2->operands[0]=argslist[j];
+					if(argslist[j]->kind ==ADDR_OP)//todo
+					{
+						argslist[j]->kind = TEMPVAR_OP;
+					}
+					insertCode(code2);
+				}
+
+				free(argslist);
+				argslist = NULL;
+				Operand funcOp = (Operand)malloc(sizeof(Operand_));
+				funcOp->kind = FUNCTION_OP;
+				strcpy(funcOp->u.value, node->first_son->token);
+
+				InterCode callIR = (InterCode)malloc(sizeof(InterCode_));
+				callIR->kind = CALL_IR;
+				place->kind = TEMPVAR_OP;
+				place->u.var_no = tmp_num++;
+				callIR->operands[0] = place;
+				callIR->operands[1] = funcOp;
+				insertCode(callIR);
 			}
 
         }
