@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+extern int lnum;	//标号
+extern int tnum;	//t 临时变
+extern int vnum;	//v 变量
+
 typedef struct Operand_* Operand;
 typedef struct Operand_ {//操作数
 	enum {VARIABLE_OP, TEMPVAR_OP, CONSTANT_OP, ADDR_OP//*

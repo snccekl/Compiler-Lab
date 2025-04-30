@@ -1,59 +1,25 @@
-FUNCTION add : 
-PARAM temp
-temp1 := #0
-temp6 := temp1 * #4
-temp7 := &temp + temp6
-temp2 := #1
-temp10 := temp2 * #4
-temp11 := &temp + temp10
-temp1 := *temp7 + *temp11
-RETURN temp1
 FUNCTION main : 
-DEC op 8 
-DEC z 8 
-temp3 := #0
-i := temp3
-temp4 := #0
-j := temp4
-LABEL label1 : 
-temp5 := #2
-IF i < temp5 GOTO label2
-GOTO label3
-LABEL label2 : 
-LABEL label4 : 
-temp6 := #2
-IF j < temp6 GOTO label5
-GOTO label6
-LABEL label5 : 
-temp21 := j * #4
-temp22 := &op + temp21
-temp23 := i + j
-*temp22 := temp23
-temp7 := #1
-temp26 := j + temp7
-j := temp26
-GOTO label4
-LABEL label6 : 
-temp8 := #0
-temp33 := temp8 * #8
-temp30 := &z + temp33
-temp35 := i * #4
-temp36 := temp30 + temp35
-ARG op
-temp9 := CALL add
-*temp36 := temp9
-temp10 := #0
-temp42 := temp10 * #8
-temp39 := &z + temp42
-temp44 := i * #4
-temp45 := temp39 + temp44
-WRITE *temp45
-temp11 := #1
-temp46 := i + temp11
-i := temp46
-temp12 := #0
-j := temp12
-GOTO label1
-LABEL label3 : 
-temp13 := #0
-RETURN temp13
+DEC z 24 
+temp6 := #0
+temp7 := temp6 * #24
+temp3 := &z + temp7
+temp9 := #1
+temp10 := temp9 * #12
+temp2 := &temp3 + temp10
+temp12 := #2
+temp13 := temp12 * #4
+temp14 := temp2 + temp13
+temp16 := #5
+*temp14 := temp16
+temp21 := #0
+temp22 := temp21 * #24
+temp18 := &z + temp22
+temp24 := #1
+temp25 := temp24 * #12
+temp17 := &temp18 + temp25
+temp27 := #2
+temp28 := temp27 * #4
+temp29 := temp17 + temp28
+WRITE *temp29
+temp31 := #0
+RETURN temp31

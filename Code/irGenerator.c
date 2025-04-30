@@ -1,5 +1,4 @@
 #include "ir.h"
-int tmp_num = 1;	//t 临时变量
 // 你自己看看吧
 void tProgram(Node *root) {
     if(root == NULL){
@@ -572,7 +571,7 @@ void tExp(Node* node, Operand place) {
 			intIR->operands[1] = intOp;
 			place->kind = TEMPVAR_OP;
 			
-            place->u.var_no = tmp_num++;
+            place->u.var_no = tnum++;
 
 			intIR->operands[0] = place;
 			insertCode(intIR);
@@ -594,7 +593,7 @@ void tExp(Node* node, Operand place) {
 					InterCode readIR = (InterCode)malloc(sizeof(InterCode_));
 					readIR->kind = READ_IR;
 					place->kind = TEMPVAR_OP;
-					place->u.var_no = tmp_num++;
+					place->u.var_no = tnum++;
 					readIR->operands[0] = place;
 					insertCode(readIR);
 				}
@@ -608,7 +607,7 @@ void tExp(Node* node, Operand place) {
 				callIR->operands[0] = place;
 				callIR->operands[1] = funcOp;
 				place->kind = TEMPVAR_OP;
-				place->u.var_no = tmp_num++;
+				place->u.var_no = tnum++;
 				insertCode(callIR);
 			}
 		}
@@ -678,7 +677,7 @@ void tExp(Node* node, Operand place) {
 				InterCode callIR = (InterCode)malloc(sizeof(InterCode_));
 				callIR->kind = CALL_IR;
 				place->kind = TEMPVAR_OP;
-				place->u.var_no = tmp_num++;
+				place->u.var_no = tnum++;
 				callIR->operands[0] = place;
 				callIR->operands[1] = funcOp;
 				insertCode(callIR);
