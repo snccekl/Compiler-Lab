@@ -280,4 +280,7 @@ Operand new_constant(int i){
 	return t;
 }
 
+void decreaseTnum() {
+	tnum--;
+}
 

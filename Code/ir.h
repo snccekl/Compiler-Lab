@@ -50,7 +50,7 @@ Operand new_temp();
 Operand new_label();
 Operand new_constant(int i);
 
-
+void decreaseTnum();
 
 // 你这框架有几个搞不懂的地方
 // 首先函数定义需要插入到中间代码的，但是我找不到框架什么东西代表函数定义

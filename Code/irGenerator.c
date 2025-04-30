@@ -106,6 +106,7 @@ void tArrayDecl(Node* arrayDecl, Operand var) {
     InterCode dec_ir = (InterCode)malloc(sizeof(InterCode_));
     dec_ir->kind = DEC_IR;
     dec_ir->operands[0] = var;
+    dec_ir->size = size;
     insertCode(dec_ir);
 }
 
@@ -383,11 +384,11 @@ void tExp(Node* node, Operand place) {
 			return;
 		}
         //Exp DOT ID
-		else if(strcmp(node->first_son->first_son->follow->name, "DOT") == 0){ 
+		else if(strcmp(node->first_son->name, "StructDecl") == 0){ 
 			// 无结构体
 		}
         //Exp LB Exp RB
-		else if (strcmp(node->first_son->first_son->follow->name, "LB") == 0){
+		else if (strcmp(node->first_son->name, "ArrayAccess") == 0){
 			Operand left = new_temp();
 			tExp(node->first_son,left);
 			Operand right = new_temp();
@@ -674,14 +675,15 @@ void tExp(Node* node, Operand place) {
     }
 	//         | Exp LB Exp RB     a[b]  左值
 	//(bodies[o_cnt].points[i_cnt]).x 
-    if (( strcmp(node->name, "ArrayAccess") == 0)){
+    if ( strcmp(node->name, "ArrayAccess") == 0){
 		//t1 数组首地址 最里层是ID t2 整型index
-		Operand t1 = new_temp();
-		Operand t2 = new_temp();
-		Operand t3 = new_temp();
+        Operand t1 = new_temp();
 		tExp(node->first_son,t1);//code1
-		tExp(node->first_son->follow,t2);//code2
+        
+        Operand t2 = new_temp();
+		tExp(node->first_son->follow->first_son,t2);//code2
 		
+        Operand t3 = new_temp();
 		int size = getSpace(t1->type->u.array.elem);
 		InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
 		code3->kind = STAR_IR;
