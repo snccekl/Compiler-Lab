@@ -22,6 +22,36 @@ void initHashtable(){
 	for(int i=0; i<HASH_SIZE; i++){
 		hashTable[i] = NULL;
 	}
+
+    {
+        FieldList field1 = (FieldList)malloc(sizeof(FieldList_));
+        field1->name = "read";
+        Type typ1 = (Type)malloc(sizeof(Type_));
+        typ1->kind = FUNCTION;
+        Type tyreturn = (Type)malloc(sizeof(Type_));
+        tyreturn->kind = BASIC;
+        tyreturn->u.basic = INT_TYPE;
+        typ1->u.function.funcType = tyreturn;
+        field1->type = typ1;
+        insert(field1);
+    
+        FieldList field2 = (FieldList)malloc(sizeof(FieldList_));
+        field2->name = "write";
+        Type typ2 = (Type)malloc(sizeof(Type_));
+        typ2->kind = FUNCTION;
+        Type tyreturn2 = (Type)malloc(sizeof(Type_));
+        tyreturn2->kind = BASIC;
+        tyreturn2->u.basic = INT_TYPE;
+        typ2->u.function.funcType = tyreturn2;
+        FieldList write_param = (FieldList)malloc(sizeof(FieldList_));
+        Type write_param_typ = (Type)malloc(sizeof(Type_));
+        write_param_typ->kind = BASIC;
+        write_param_typ->u.basic = INT_TYPE;
+        field2->type = typ2;
+        insert(field2);
+    }
+
+
     scope sc;
     sc.id = 0;
     sc.parent_id = -1;//表示自己是最外层的
