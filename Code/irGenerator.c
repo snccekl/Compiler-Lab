@@ -718,11 +718,14 @@ void tExp(Node* node, Operand place) {
 		else{
 			Operand t4 = new_temp();
 			InterCode code4 = (InterCode)malloc(sizeof(InterCode_));
+            
 			code4->kind = PLUS_IR;
+            if(!strcmp(node->first_son->name, "ID"))
+                code4->kind = ADDR_IR3;
 			code4->operands[0] = t4;
 			code4->operands[1] = t1;
 			code4->operands[2] = t3;
-			
+            
 			place->kind = ADDR_OP;//在外面会取*作为值
 			place->u.var_no=t4->u.var_no;
 			insertCode(code4);
