@@ -2,10 +2,10 @@ FUNCTION add :
 PARAM temp
 temp1 := #0
 temp6 := temp1 * #4
-temp7 := &temp + temp6
+temp7 := temp + temp6
 temp2 := #1
 temp10 := temp2 * #4
-temp11 := &temp + temp10
+temp11 := temp + temp10
 temp1 := *temp7 + *temp11
 RETURN temp1
 FUNCTION main : 
@@ -26,7 +26,7 @@ IF j < temp6 GOTO label5
 GOTO label6
 LABEL label5 : 
 temp21 := j * #4
-temp22 := &op + temp21
+temp22 := op + temp21
 temp23 := i + j
 *temp22 := temp23
 temp7 := #1
@@ -38,7 +38,7 @@ temp8 := #0
 temp33 := temp8 * #8
 temp30 := &z + temp33
 temp35 := i * #4
-temp36 := &temp30 + temp35
+temp36 := temp30 + temp35
 ARG op
 temp9 := CALL add
 *temp36 := temp9
@@ -46,7 +46,7 @@ temp10 := #0
 temp42 := temp10 * #8
 temp39 := &z + temp42
 temp44 := i * #4
-temp45 := &temp39 + temp44
+temp45 := temp39 + temp44
 WRITE *temp45
 temp11 := #1
 temp46 := i + temp11
