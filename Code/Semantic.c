@@ -32,6 +32,8 @@ void initHashtable(){
         tyreturn->kind = BASIC;
         tyreturn->u.basic = INT_TYPE;
         typ1->u.function.funcType = tyreturn;
+        typ1->u.function.paramNum = 0;
+        typ1->u.function.params = NULL;
         field1->type = typ1;
         insert(field1);
     
@@ -43,10 +45,14 @@ void initHashtable(){
         tyreturn2->kind = BASIC;
         tyreturn2->u.basic = INT_TYPE;
         typ2->u.function.funcType = tyreturn2;
+        typ2->u.function.paramNum = 1;
         FieldList write_param = (FieldList)malloc(sizeof(FieldList_));
+        write_param->name = "write_param_name";
         Type write_param_typ = (Type)malloc(sizeof(Type_));
         write_param_typ->kind = BASIC;
         write_param_typ->u.basic = INT_TYPE;
+        write_param->type = write_param_typ;
+        typ2->u.function.params = write_param;
         field2->type = typ2;
         insert(field2);
     }
