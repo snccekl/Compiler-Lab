@@ -59,6 +59,7 @@ typedef struct FieldList_ {
 	Type type;//域的类型
 	FieldList tail;//下一个域
 	int scope_id;//作用域
+    char ifparam[4];//是否是参数 ispa
 }FieldList_;
 
 

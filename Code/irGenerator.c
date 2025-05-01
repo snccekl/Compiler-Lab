@@ -548,9 +548,21 @@ void tExp(Node* node, Operand place) {
         //     }
         //     printf("\n");
         // }
-
+        
 		if (place != NULL) {
-            place->kind = VARIABLE_OP;
+            if( (f->type->kind  == STRUCTURE || f->type->kind == ARRAY)  && !(strcmp(f->ifparam,"ispa") == 0 )				//并且不是参数	
+            ){
+			place->kind = QU_ADDR_OP;
+			
+		}
+		else
+		{
+			place->kind = VARIABLE_OP;
+			
+		}
+
+
+            //place->kind = VARIABLE_OP;
             place->type = f->type;//满足(f->type->kind == ARRAY)   就要赋值type 一起赋值了
             strcpy(place->u.value, node->token);
 		}
@@ -665,7 +677,7 @@ void tExp(Node* node, Operand place) {
 					InterCode code2 =(InterCode)malloc(sizeof(InterCode_));
 					code2->kind = ARG_IR;
 					code2->operands[0]=argslist[j];
-					if(argslist[j]->kind ==ADDR_OP)//todo
+					if(argslist[j]->kind ==ADDR_OP)
 					{
 						argslist[j]->kind = TEMPVAR_OP;
 					}
@@ -711,9 +723,9 @@ void tExp(Node* node, Operand place) {
 		if(t1->type->u.array.elem->kind == ARRAY){	
             //(bodies[o_cnt].points[i_cnt].x) 
 			InterCode code4 = (InterCode)malloc(sizeof(InterCode_));
-            if(!strcmp(node->first_son->name, "ID"))
-			    code4->kind = ADDR_IR3;
-            else
+            // if(!strcmp(node->first_son->name, "ID"))
+			//     code4->kind = ADDR_IR3;
+            // else
             code4->kind = PLUS_IR;
 			place->type = t1->type->u.array.elem;
 			code4->operands[0] = place;
@@ -726,8 +738,8 @@ void tExp(Node* node, Operand place) {
 			InterCode code4 = (InterCode)malloc(sizeof(InterCode_));
             
 			code4->kind = PLUS_IR;
-            if(!strcmp(node->first_son->name, "ID"))
-                code4->kind = ADDR_IR3;
+            // if(!strcmp(node->first_son->name, "ID"))
+            //     code4->kind = ADDR_IR3;
 			code4->operands[0] = t4;
 			code4->operands[1] = t1;
 			code4->operands[2] = t3;

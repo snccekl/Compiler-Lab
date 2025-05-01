@@ -463,6 +463,7 @@ FieldList VarList(Node* node) {
 
         prs_field->tail = next_field;
     }
+    strcpy(prs_field->ifparam,"ispa");
     return prs_field;
 }
 
