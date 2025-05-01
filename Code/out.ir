@@ -1,0 +1,16 @@
+FUNCTION div : 
+PARAM a
+PARAM b
+temp1 := a / b
+RETURN temp1
+FUNCTION main : 
+temp5 := #6
+a := temp5
+temp7 := #2
+b := temp7
+ARG b
+ARG a
+temp10 := CALL div
+WRITE temp10
+temp12 := #0
+RETURN temp12

@@ -43,7 +43,7 @@ int main(int argc, char** argv) {
 
         initIRList();
         tProgram(ast_root);
-        printCode("test_1.ir");
+        printCode(argv[2]);
     }
     return 0;
 }

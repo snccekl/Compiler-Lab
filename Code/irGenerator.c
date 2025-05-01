@@ -551,17 +551,12 @@ void tExp(Node* node, Operand place) {
         
 		if (place != NULL) {
             if( (f->type->kind  == STRUCTURE || f->type->kind == ARRAY)  && !(strcmp(f->ifparam,"ispa") == 0 )				//并且不是参数	
-            ){
-			place->kind = QU_ADDR_OP;
-			
-		}
-		else
-		{
-			place->kind = VARIABLE_OP;
-			
-		}
-
-
+            ) {
+			    place->kind = QU_ADDR_OP;
+            }
+            else {
+                place->kind = VARIABLE_OP;
+            }
             //place->kind = VARIABLE_OP;
             place->type = f->type;//满足(f->type->kind == ARRAY)   就要赋值type 一起赋值了
             strcpy(place->u.value, node->token);
@@ -655,32 +650,27 @@ void tExp(Node* node, Operand place) {
 			}
 			else{
                 Node * args = node->first_son->follow;
+                Node* arg = args->first_son;
 				Operand* argslist = (Operand*)malloc(50* sizeof(Operand) );
-				int i =0;
-				while(1){	
+				int i = 0;
+				while(arg != NULL){	
 					Operand t1 = new_temp();
-					tExp(args->first_son,t1);
+					tExp(arg, t1);
 
-                    if(t1->type->kind == ARRAY)
+                    if(t1->type != NULL && t1->type->kind == ARRAY)
                         t1->kind = QU_ADDR_OP;
-
+                    
                     argslist[i++] = t1;
-					if(args->follow != NULL)
-					{
-						args = args->follow;
-					}
-					else{
-						break;
-					}
+					arg = arg->follow;
 				}
-				for(int j=0;j<i;j++){
+				for(int j = i - 1; j >= 0; j--){
 					InterCode code2 =(InterCode)malloc(sizeof(InterCode_));
 					code2->kind = ARG_IR;
 					code2->operands[0]=argslist[j];
-					if(argslist[j]->kind ==ADDR_OP)
-					{
-						argslist[j]->kind = TEMPVAR_OP;
-					}
+					// if(argslist[j]->kind ==ADDR_OP)
+					// {
+					// 	argslist[j]->kind = TEMPVAR_OP;
+					// }
 					insertCode(code2);
 				}
 
@@ -692,8 +682,11 @@ void tExp(Node* node, Operand place) {
 
 				InterCode callIR = (InterCode)malloc(sizeof(InterCode_));
 				callIR->kind = CALL_IR;
-				place->kind = TEMPVAR_OP;
-				place->u.var_no = tnum++;
+                
+                if(place != NULL) {
+				    place->kind = TEMPVAR_OP;
+				    place->u.var_no = tnum++;
+                }
 				callIR->operands[0] = place;
 				callIR->operands[1] = funcOp;
 				insertCode(callIR);
