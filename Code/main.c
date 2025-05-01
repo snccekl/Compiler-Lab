@@ -42,8 +42,10 @@ int main(int argc, char** argv) {
             printAST(ast_root, 0, 0);
 
         initIRList();
-        tProgram(ast_root);
-        printCode(argv[2]);
+        if(!has_struct) {
+            tProgram(ast_root);
+            printCode(argv[2]);
+        }
     }
     return 0;
 }

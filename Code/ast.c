@@ -1,6 +1,8 @@
 #include "tree.h"
 #include "ast.h"
 
+int has_struct = 0;
+
 Node* createAstNode(char* name, char* token, int line, int scope_id, int flag) {
     Node* AstNode = createNode(1, name, token);
     AstNode->line = line;
@@ -89,6 +91,7 @@ Node* transferSpecifier(Node* node) {
         return type;
     }
     else {
+        has_struct = 1;
         Node* structer = transferStructSpecifier(first);
         return structer;
     }
@@ -525,6 +528,7 @@ Node* transferExp(Node* node, Node* parent) {
     
     // Exp DOT ID
     else if(node->num_child == 3 && !strcmp(first->follow->name, "DOT")) {
+        has_struct = 1;
         exp = createAstNode("Access", "", first->line, node->scope_id, -1);
         Node* first_son = transferExp(first, exp);
         Node* id = first->follow->follow;

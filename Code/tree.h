@@ -20,6 +20,8 @@ struct Node{
 };
 typedef struct Node Node;
 
+extern int has_struct;
+
 // createNode 用于创建节点
 Node* createNode(int type, char* name,char * yytext);
 

@@ -613,8 +613,10 @@ void tExp(Node* node, Operand place) {
 				callIR->kind = CALL_IR;
 				callIR->operands[0] = place;
 				callIR->operands[1] = funcOp;
-				place->kind = TEMPVAR_OP;
-				place->u.var_no = tnum++;
+                if(place != NULL) {
+                    place->kind = TEMPVAR_OP;
+                    place->u.var_no = tnum++;
+                }
 				insertCode(callIR);
 			}
 		}
@@ -720,7 +722,9 @@ void tExp(Node* node, Operand place) {
 			//     code4->kind = ADDR_IR3;
             // else
             code4->kind = PLUS_IR;
-			place->type = t1->type->u.array.elem;
+            if(place != NULL) {
+                place->type = t1->type->u.array.elem;
+            }
 			code4->operands[0] = place;
 			code4->operands[1] = t1;
 			code4->operands[2] = t3;
@@ -737,8 +741,10 @@ void tExp(Node* node, Operand place) {
 			code4->operands[1] = t1;
 			code4->operands[2] = t3;
             
-			place->kind = ADDR_OP;//在外面会取*作为值
-			place->u.var_no=t4->u.var_no;
+            if(place != NULL) {
+			    place->kind = ADDR_OP;//在外面会取*作为值
+			    place->u.var_no=t4->u.var_no;
+            }
 			insertCode(code4);
 		}
 
