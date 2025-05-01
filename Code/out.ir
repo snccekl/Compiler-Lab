@@ -1,31 +1,32 @@
-FUNCTION main : 
-temp2 := #0
-m := temp2
-READ temp4
-n := temp4
-IF n != #0 GOTO label3
-GOTO label1
-LABEL label3 : 
-temp8 := #1
-m := temp8
-temp6 := temp8
-IF temp6 != #0 GOTO label2
-GOTO label1
-LABEL label1 : 
-WRITE m
-LABEL label2 : 
-READ temp10
-n := temp10
-IF n != #0 GOTO label5
-GOTO label6
-LABEL label6 : 
-temp14 := #2
-m := temp14
-temp12 := temp14
-IF temp12 != #0 GOTO label5
-GOTO label4
-LABEL label4 : 
-WRITE m
-LABEL label5 : 
-temp16 := #0
+FUNCTION func1 : 
+PARAM a
+temp6 := #0
+temp7 := temp6 * #4
+temp8 := a + temp7
+temp11 := #1
+temp12 := temp11 * #4
+temp13 := a + temp12
+temp1 := *temp8 + *temp13
+RETURN temp1
+FUNCTION func2 : 
+PARAM b
+ARG b
+temp16 := CALL func1
 RETURN temp16
+FUNCTION main : 
+DEC c 8 
+temp20 := #0
+temp21 := temp20 * #4
+temp22 := &c + temp21
+temp24 := #1
+*temp22 := temp24
+temp28 := #1
+temp29 := temp28 * #4
+temp30 := &c + temp29
+temp32 := #2
+*temp30 := temp32
+ARG &c
+temp34 := CALL func2
+WRITE temp34
+temp36 := #0
+RETURN temp36

@@ -550,7 +550,8 @@ void tExp(Node* node, Operand place) {
         // }
         
 		if (place != NULL) {
-            if( (f->type->kind  == STRUCTURE || f->type->kind == ARRAY)  && !(strcmp(f->ifparam,"ispa") == 0 )				//并且不是参数	
+            if( (f->type->kind  == STRUCTURE || f->type->kind == ARRAY) 
+                && !(strcmp(f->ifparam,"ispa") == 0 )				//并且不是参数	
             ) {
 			    place->kind = QU_ADDR_OP;
             }
@@ -659,8 +660,8 @@ void tExp(Node* node, Operand place) {
 					Operand t1 = new_temp();
 					tExp(arg, t1);
 
-                    if(t1->type != NULL && t1->type->kind == ARRAY)
-                        t1->kind = QU_ADDR_OP;
+                    // if(t1->type != NULL && t1->type->kind == ARRAY)
+                    //     t1->kind = QU_ADDR_OP;
                     
                     argslist[i++] = t1;
 					arg = arg->follow;
