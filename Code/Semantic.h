@@ -66,7 +66,7 @@ typedef struct FieldList_ {
 extern FieldList hashTable[HASH_SIZE];
 extern int scope_id;
 extern int current_id;
-extern scope sc_table[50];
+extern scope sc_table[256];
 
 
 void enter_scope();

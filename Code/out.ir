@@ -1,16 +1,31 @@
-FUNCTION div : 
-PARAM a
-PARAM b
-temp1 := a / b
-RETURN temp1
 FUNCTION main : 
-temp5 := #6
-a := temp5
-temp7 := #2
-b := temp7
-ARG b
-ARG a
-temp10 := CALL div
-WRITE temp10
-temp12 := #0
-RETURN temp12
+temp2 := #0
+m := temp2
+READ temp4
+n := temp4
+IF n != #0 GOTO label3
+GOTO label1
+LABEL label3 : 
+temp8 := #1
+m := temp8
+temp6 := temp8
+IF temp6 != #0 GOTO label2
+GOTO label1
+LABEL label1 : 
+WRITE m
+LABEL label2 : 
+READ temp10
+n := temp10
+IF n != #0 GOTO label5
+GOTO label6
+LABEL label6 : 
+temp14 := #2
+m := temp14
+temp12 := temp14
+IF temp12 != #0 GOTO label5
+GOTO label4
+LABEL label4 : 
+WRITE m
+LABEL label5 : 
+temp16 := #0
+RETURN temp16

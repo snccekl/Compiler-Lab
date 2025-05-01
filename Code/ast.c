@@ -481,7 +481,7 @@ Node* transferExp(Node* node, Node* parent) {
     else if(node->num_child == 2 && !strcmp(first->follow->name, "Exp")) {
         exp = createAstNode("UnaryOp", "", node->line, node->scope_id, -1);
 
-        Node* op = createAstNode("Op", first->token, first->line, node->scope_id, -1);
+        Node* op = createAstNode(first->name, first->token, first->line, node->scope_id, -1);
         Node* first_exp = transferExp(first->follow, exp);
 
         exp->parent = parent;

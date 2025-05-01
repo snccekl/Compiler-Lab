@@ -3,7 +3,7 @@
 FieldList hashTable[HASH_SIZE];
 int scope_id = 0;
 int current_id = 0;
-scope sc_table[50];
+scope sc_table[256];
 
 //散列函数
 //代码第7行的常数（0x3fff）确定了符号表的大小（即16384）

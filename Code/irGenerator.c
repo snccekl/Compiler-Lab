@@ -261,91 +261,91 @@ void tStmt(Node* stmt) {
 
 void tCond(Node* node, Operand label_true, Operand label_false) {
     // TODO
-        //Exp1 RELOP Exp2
-        
-        // t1 = new_temp()
-        // t2 = new_temp()
-        // code1 = translate_Exp(Exp1, sym_table, t1)
-        // code2 = translate_Exp(Exp2, sym_table, t2)
-        // op = get_relop(RELOP);
-        // code3 = [IF t1 op t2 GOTO label_true]
-        // return code1 + code2 + code3 + [GOTO label_false]
-        if(strcmp(node->name, "RELOP") == 0){
-            Operand t1 = new_temp();
-            Operand t2 = new_temp();
-            tExp(node->first_son,t1);//code1
-            tExp(node->first_son->follow,t2);//code2
-            char * op = node->token;
-            InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
-            code3->kind = IF_GOTO_IR;
-            code3->operands[0] = t1;
-            code3->operands[1] = t2;
-            code3->operands[2] = label_true;
-            strcpy(code3->relop,op);
-            insertCode(code3);
+    //Exp1 RELOP Exp2
     
-            InterCode code4 = (InterCode)malloc(sizeof(InterCode_));
-            code4->kind = GOTO_IR;
-            code4->operands[0] = label_false;
-            insertCode(code4);
-        }
-        //NOT Exp1
-        //translate_Cond(Exp1, label_false, label_true, sym_table)
-        else if (strcmp(node->first_son->name, "NOT") == 0){
-            Node* exp1 = node->first_son->follow;
-            tCond(exp1,label_false,label_true);
-        }
-        //Exp1 AND Exp2
-        // label1 = new_label()
-        // code1 = translate_Cond(Exp1, label1, label_false, sym_table)
-        // code2 = translate_Cond(Exp2, label_true, label_false, sym_table)
-        // return code1 + [LABEL label1] + code2
-        else if(strcmp(node->name, "AND") == 0){
-            Operand label1 = new_label();
-            tCond(node->first_son,label1,label_false);
-            InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
-            code3->kind = LABEL_IR;
-            code3->operands[0] = label1;
-            insertCode(code3);
-            tCond(node->first_son->follow,label_true,label_false);
-        }
-        //Exp1 OR Exp2
-        // label1 = new_label()
-        // code1 = translate_Cond(Exp1, label_true, label1, sym_table)
-        // code2 = translate_Cond(Exp2, label_true, label_false, sym_table)
-        // return code1 + [LABEL label1] + code2
-        else if(strcmp(node->name, "OR") == 0){
-            Operand label1 = new_label();
-            tCond(node->first_son,label_true,label1);
-            InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
-            code3->kind = LABEL_IR;
-            code3->operands[0] = label1;
-            insertCode(code3);
-            tCond(node->first_son->follow,label_true,label_false);
-        }
-        else{
-            // t1 = new_temp()
-            // code1 = translate_Exp(Exp, sym_table, t1)
-            // code2 = [IF t1 != #0 GOTO label_true]
-            // return code1 + code2 + [GOTO label_false]
-            Operand t1 = new_temp();
-            tExp(node->first_son,t1);
-            InterCode code2 = (InterCode)malloc(sizeof(InterCode_));
-            code2->kind = IF_GOTO_IR;
-            code2->operands[0] = t1;
-            strcpy(code2->relop ,"!=");
-            //#0
-            Operand t2 = (Operand)malloc(sizeof(Operand_));
-            t2->kind = CONSTANT_OP;
-            strcpy(t2->u.value ,"0");
-            code2->operands[1] = t2;
-            code2->operands[2] = label_true;
-            insertCode(code2);
-            InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
-            code3->kind = GOTO_IR;
-            code3->operands[0] = label_false;
-            insertCode(code3);
-        }
+    // t1 = new_temp()
+    // t2 = new_temp()
+    // code1 = translate_Exp(Exp1, sym_table, t1)
+    // code2 = translate_Exp(Exp2, sym_table, t2)
+    // op = get_relop(RELOP);
+    // code3 = [IF t1 op t2 GOTO label_true]
+    // return code1 + code2 + code3 + [GOTO label_false]
+    if(strcmp(node->name, "RELOP") == 0){
+        Operand t1 = new_temp();
+        Operand t2 = new_temp();
+        tExp(node->first_son,t1);//code1
+        tExp(node->first_son->follow,t2);//code2
+        char * op = node->token;
+        InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
+        code3->kind = IF_GOTO_IR;
+        code3->operands[0] = t1;
+        code3->operands[1] = t2;
+        code3->operands[2] = label_true;
+        strcpy(code3->relop,op);
+        insertCode(code3);
+
+        InterCode code4 = (InterCode)malloc(sizeof(InterCode_));
+        code4->kind = GOTO_IR;
+        code4->operands[0] = label_false;
+        insertCode(code4);
+    }
+    //NOT Exp1
+    //translate_Cond(Exp1, label_false, label_true, sym_table)
+    else if (!strcmp(node->name, "UnaryOp") && strcmp(node->first_son->name, "NOT") == 0){
+        Node* exp1 = node->first_son->follow;
+        tCond(exp1,label_false,label_true);
+    }
+    //Exp1 AND Exp2
+    // label1 = new_label()
+    // code1 = translate_Cond(Exp1, label1, label_false, sym_table)
+    // code2 = translate_Cond(Exp2, label_true, label_false, sym_table)
+    // return code1 + [LABEL label1] + code2
+    else if(strcmp(node->name, "AND") == 0){
+        Operand label1 = new_label();
+        tCond(node->first_son,label1,label_false);
+        InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
+        code3->kind = LABEL_IR;
+        code3->operands[0] = label1;
+        insertCode(code3);
+        tCond(node->first_son->follow,label_true,label_false);
+    }
+    //Exp1 OR Exp2
+    // label1 = new_label()
+    // code1 = translate_Cond(Exp1, label_true, label1, sym_table)
+    // code2 = translate_Cond(Exp2, label_true, label_false, sym_table)
+    // return code1 + [LABEL label1] + code2
+    else if(strcmp(node->name, "OR") == 0){
+        Operand label1 = new_label();
+        tCond(node->first_son,label_true,label1);
+        InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
+        code3->kind = LABEL_IR;
+        code3->operands[0] = label1;
+        insertCode(code3);
+        tCond(node->first_son->follow,label_true,label_false);
+    }
+    else{
+        // t1 = new_temp()
+        // code1 = translate_Exp(Exp, sym_table, t1)
+        // code2 = [IF t1 != #0 GOTO label_true]
+        // return code1 + code2 + [GOTO label_false]
+        Operand t1 = new_temp();
+        tExp(node, t1);
+        InterCode code2 = (InterCode)malloc(sizeof(InterCode_));
+        code2->kind = IF_GOTO_IR;
+        code2->operands[0] = t1;
+        strcpy(code2->relop ,"!=");
+        //#0
+        Operand t2 = (Operand)malloc(sizeof(Operand_));
+        t2->kind = CONSTANT_OP;
+        strcpy(t2->u.value ,"0");
+        code2->operands[1] = t2;
+        code2->operands[2] = label_true;
+        insertCode(code2);
+        InterCode code3 = (InterCode)malloc(sizeof(InterCode_));
+        code3->kind = GOTO_IR;
+        code3->operands[0] = label_false;
+        insertCode(code3);
+    }
 }
 
 void tExp(Node* node, Operand place) {
