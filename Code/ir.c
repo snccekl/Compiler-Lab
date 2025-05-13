@@ -9,7 +9,7 @@ int vnum = 1;	//v 变量
 InterCode *IRList; // IR表 动态数组
 int IRsize;
 int IRMAXSIZE;
-void repr(Operand op, FILE *fp);
+void repr2(Operand op, FILE *fp);
 
 extern FieldList hashTable[HASH_SIZE];
 extern int scope_id;
@@ -89,6 +89,53 @@ void repr(Operand op, FILE *fp) {
 		break;
 	}
 }
+
+//为了方便输出，做的新repr函数
+void repr2(Operand op, FILE *fp) 
+{
+	if (op == NULL) {
+		printf("debug op == NULL");
+		return;
+	}
+	switch (op->kind) 
+    {
+
+	case VARIABLE_OP://变量名
+		if (op->u.value != NULL) {
+			sprintf(op->name, "%s", op->u.value);
+		}
+		fputs(op->name,fp);
+		break;
+	case TEMPVAR_OP://temp1
+		sprintf(op->name, "temp%d", op->u.var_no);
+		fputs(op->name,fp);
+		break;
+	case CONSTANT_OP://value1常数
+        op->constant = atoi(op->u.value);
+		fputs(op->u.value,fp);
+		break;
+	case ADDR_OP://*temp1
+		sprintf(op->name, "*temp%d", op->u.var_no);
+		fputs(op->name,fp);
+		//printf("debug");
+		break;
+	case QU_ADDR_OP://&变量名
+		sprintf(op->name, "&%s", op->u.value);
+		fputs(op->name,fp);
+        //printf("debug");
+		break;
+	case LABEL_OP://label1
+		sprintf(op->name, "label%d", op->u.label_no);
+		fputs(op->name,fp);
+		break;
+	case FUNCTION_OP://函数名
+		sprintf(op->name, "%s", op->u.value);
+		fputs(op->name,fp);
+		break;
+	}
+	fputs(" ",fp);
+}
+
 void printCode(char *filename) {
 	FILE *fp;
 	if (strcmp(filename, "stdout") == 0) {
@@ -111,91 +158,91 @@ void printCode(char *filename) {
 		{
 		case LABEL_IR:
 			fputs("LABEL ", fp);
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			fputs(" : ", fp);
 			break;
 		case FUNCTION_IR:
 			fputs("FUNCTION ", fp);
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			fputs(" : ", fp);
 			break;
 		case ASSIGN_IR:
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			fputs(" := ", fp);
-			repr(ir->operands[1], fp);
+			repr2(ir->operands[1], fp);
 			break;
 		case PLUS_IR:
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			fputs(" := ", fp);
-			repr(ir->operands[1], fp);
+			repr2(ir->operands[1], fp);
 			fputs(" + ", fp);
-			repr(ir->operands[2], fp);
+			repr2(ir->operands[2], fp);
 			break;
 		case MINUS_IR:
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			fputs(" := ", fp);
-			repr(ir->operands[1], fp);
+			repr2(ir->operands[1], fp);
 			fputs(" - ", fp);
-			repr(ir->operands[2], fp);
+			repr2(ir->operands[2], fp);
 			break;
 		case STAR_IR:
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			fputs(" := ", fp);
-			repr(ir->operands[1], fp);
+			repr2(ir->operands[1], fp);
 			fputs(" * ", fp);
-			repr(ir->operands[2], fp);
+			repr2(ir->operands[2], fp);
 			break;
 		case DIV_IR:
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			fputs(" := ", fp);
-			repr(ir->operands[1], fp);
+			repr2(ir->operands[1], fp);
 			fputs(" / ", fp);
-			repr(ir->operands[2], fp);
+			repr2(ir->operands[2], fp);
 			break;
 		case ADDR_IR2:
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			fputs(" := &", fp);
-			repr(ir->operands[1], fp);
+			repr2(ir->operands[1], fp);
 			break;
 		case ADDR_IR3:
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			fputs(" := &", fp);
-			repr(ir->operands[1], fp);
+			repr2(ir->operands[1], fp);
 			fputs(" + ", fp);
-			repr(ir->operands[2], fp);
+			repr2(ir->operands[2], fp);
 			break;
 		case ADDR_VALUE_IR:
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			fputs(" := *", fp);
-			repr(ir->operands[1], fp);
+			repr2(ir->operands[1], fp);
 			break;
 		case MEMORY_IR:
 			fputs("*", fp);
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			fputs(" := ", fp);
-			repr(ir->operands[1], fp);
+			repr2(ir->operands[1], fp);
 			break;
 		case GOTO_IR:
 			fputs("GOTO ", fp);
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			break;
 		case IF_GOTO_IR:
 			fputs("IF ", fp);
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			fputs(" ", fp);
 			fputs(ir->relop, fp);
 			fputs(" ", fp);
-			repr(ir->operands[1], fp);
+			repr2(ir->operands[1], fp);
 			fputs(" GOTO ", fp);
-			repr(ir->operands[2], fp);
+			repr2(ir->operands[2], fp);
 			break;
 		case RETURN_IR:
 			fputs("RETURN ", fp);
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			break;
 		case DEC_IR:
 			fputs("DEC ", fp);
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			char str[10];
 			memset(str, 0, sizeof(str));
 			sprintf(str, " %d ", ir->size);
@@ -203,30 +250,46 @@ void printCode(char *filename) {
 			break;
 		case ARG_IR:
 			fputs("ARG ", fp);
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			break;
 		case CALL_IR:
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			fputs(" := CALL ", fp);
-			repr(ir->operands[1], fp);
+			repr2(ir->operands[1], fp);
 			break;
 		case PARAM_IR:
 			fputs("PARAM ", fp);
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			break;
 		case READ_IR:
 			fputs("READ ", fp);
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			break;
 		case WRITE_IR:
 			fputs("WRITE ", fp);
-			repr(ir->operands[0], fp);
+			repr2(ir->operands[0], fp);
 			break;
 		case DEBUG_IR:
 			fputs("DEBUG", fp);
 			fputs(ir->operands[0]->u.value,fp);
 			break;
-		}
+        case QU_IR:
+			repr(ir->operands[0], fp);
+			fputs(" := &", fp);
+			repr(ir->operands[1], fp);
+			break;
+		case EQ_ST_IR:
+			repr(ir->operands[0], fp);
+			fputs(" := *", fp);
+			repr(ir->operands[1], fp);
+			break;
+		case ST_EQ_IR:
+			fputs("*", fp);
+			repr(ir->operands[0], fp);
+			fputs(" := ", fp);
+			repr(ir->operands[1], fp);
+			break;
+        }
 		fputs("\n", fp);
 	}
 	fclose(fp);

@@ -2,6 +2,7 @@
 #include "ast.h"
 
 int has_struct = 0;
+int IRsize;
 
 Node* createAstNode(char* name, char* token, int line, int scope_id, int flag) {
     Node* AstNode = createNode(1, name, token);

@@ -21,6 +21,10 @@ typedef struct Operand_ {//操作数
 		char value[256];		   //值 		
 	}u;
 	//int tempint;
+
+    // 为了便于实验四 这里将输出整合
+	char name[32];//变量名
+	int constant;//仅CONSTANT 
 	Type type;
 }Operand_;
 
@@ -33,7 +37,8 @@ typedef struct InterCode_ {
 			ADDR_IR3,
             ADDR_VALUE_IR, // x := *y 
 			MEMORY_IR, //*x := y 
-            GOTO_IR, IF_GOTO_IR, RETURN_IR, DEC_IR, ARG_IR, CALL_IR, PARAM_IR, READ_IR, WRITE_IR,DEBUG_IR
+            GOTO_IR, IF_GOTO_IR, RETURN_IR, DEC_IR, ARG_IR, CALL_IR, PARAM_IR, READ_IR, WRITE_IR,DEBUG_IR,
+            EQ_ST_IR,ST_EQ_IR,QU_IR
 	}kind;
     Operand operands[3];
     int size;
