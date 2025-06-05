@@ -23,7 +23,7 @@ typedef struct Operand_ {//操作数
 	//int tempint;
 
     // 为了便于实验四 这里将输出整合
-	char name[32];//变量名
+	char name[257];//变量名
 	int constant;//仅CONSTANT 
 	Type type;
 }Operand_;

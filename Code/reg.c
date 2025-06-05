@@ -4,11 +4,10 @@
 #define REG_BEGIN 8
 #define REG_END 25
 
-int last = REG_BEGIN;
-Register* regList[32];
-varList* varListReg = NULL;
-varList* varListMem = NULL;
-int offset = 0;
+// int last = REG_BEGIN;
+// Register* regList[32];
+// varList* varListReg = NULL;
+// varList* varListMem = NULL;
 
 // 初始化寄存器
 void initRegisters() {
