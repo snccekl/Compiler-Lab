@@ -45,9 +45,9 @@ int main(int argc, char** argv) {
         if(!has_struct) {
             printf("%d\n", argc);
             tProgram(ast_root);
-            printCode(argv[2]);
+            printCode("tmp.ir");
             getName("name.ir");
-            writeCode(argv[3]);
+            writeCode(argv[2]);
         }
     }
     return 0;
