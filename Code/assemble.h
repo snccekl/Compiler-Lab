@@ -36,7 +36,7 @@ extern varList* varListMem;//内存的变量表
 extern int offset;
 extern Register* regList[32];
 extern int last;
-
+void writeCode(char *filename);
 void clearVarList(varList* varList);
 
 //在某个列表中添加变量: 寄存器-操作数 

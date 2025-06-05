@@ -58,7 +58,7 @@ Operand new_var();
 Operand new_temp();
 Operand new_label();
 Operand new_constant(int i);
-
+void getName(char *filename);
 void decreaseTnum();
 
 // 你这框架有几个搞不懂的地方
