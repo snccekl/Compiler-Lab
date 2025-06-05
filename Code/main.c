@@ -43,6 +43,7 @@ int main(int argc, char** argv) {
 
         initIRList();
         if(!has_struct) {
+            printf("%d\n", argc);
             tProgram(ast_root);
             printCode(argv[2]);
             getName("name.ir");

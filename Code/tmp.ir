@@ -1,0 +1,9 @@
+FUNCTION main : 
+temp2 := #1
+a := temp2
+temp4 := #2
+b := temp4
+temp5 := a + b
+a := temp5
+temp9 := #0
+RETURN temp9
