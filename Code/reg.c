@@ -78,6 +78,9 @@ void saveToStack(FILE *fp, int reg, Operand op)
 
 
 int saveToReg(FILE* fp, Operand op) {
+    if(op == NULL)
+        return -1;
+
     if (op->kind != CONSTANT_OP){
         int reg = assignReg(op);
         for(Varible* temp = varListMem->head;temp!=NULL;temp=temp->next)

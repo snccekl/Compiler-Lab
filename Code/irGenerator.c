@@ -571,18 +571,21 @@ void tExp(Node* node, Operand place) {
         t->u.basic = INT_TYPE;
 
 		if (place != NULL) {
-			InterCode intIR = (InterCode)malloc(sizeof(InterCode_));
-			intIR->kind = ASSIGN_IR;
-			Operand intOp = (Operand)malloc(sizeof(Operand_));
-			intOp->kind = CONSTANT_OP;
-			strcpy(intOp->u.value, node->token);
-			intIR->operands[1] = intOp;
-			place->kind = TEMPVAR_OP;
+			// InterCode intIR = (InterCode)malloc(sizeof(InterCode_));
+			// intIR->kind = ASSIGN_IR;
+			// Operand intOp = (Operand)malloc(sizeof(Operand_));
+			// intOp->kind = CONSTANT_OP;
+			// strcpy(intOp->u.value, node->token);
+			// intIR->operands[1] = intOp;
+			// place->kind = TEMPVAR_OP;
 			
-            place->u.var_no = tnum++;
+            // place->u.var_no = tnum++;
 
-			intIR->operands[0] = place;
-			insertCode(intIR);
+			// intIR->operands[0] = place;
+			// insertCode(intIR);
+            place->kind = CONSTANT_OP;
+            place->type = t;
+            strcpy(place->u.value, node->token);
 		}
 		return;
     }
@@ -647,7 +650,8 @@ void tExp(Node* node, Operand place) {
 					Operand t = new_constant(0);
 					InterCode pl0 = (InterCode)malloc(sizeof(InterCode_));
 					pl0->kind = ASSIGN_IR;
-					pl0->operands[0] = t;
+					pl0->operands[0] = place;
+                    pl0->operands[1] = t;
 					insertCode(pl0);
 				}
 			}

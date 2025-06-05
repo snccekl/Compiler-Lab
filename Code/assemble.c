@@ -27,7 +27,7 @@ void insertIndexCode(int index,InterCode ir)
 
 int transition(Operand op,int index,int opth){
     if (op == NULL) {
-		printf("debug op == NULL");
+		// printf("debug op == NULL");
 		return 0;
 	}
 	switch (op->kind) 
@@ -386,9 +386,14 @@ void transToAssem(FILE *fp, int index)
     }
     else if (kind == FUNCTION_IR)
     {
-        fprintf(fp, "\n%s:\n", interCode->operands[0]->name);
+        if(strcmp(interCode->operands[0]->name, "main") == 0)
+            fprintf(fp, "\n%s:\n", interCode->operands[0]->name);
+        else
+            fprintf(fp, "\n%s_func:\n", interCode->operands[0]->name);
+        
+
         fprintf(fp, "  move $gp, $sp\n");
-{
+
         //清空寄存器
         for (int i = 1; i < 32; ++i)
         regList[i]->isEmpty = 1;
@@ -396,7 +401,7 @@ void transToAssem(FILE *fp, int index)
         clearVarList(varListReg);
         clearVarList(varListMem);
         offset = 0;
-}
+
 
         FieldList field = searchByName(interCode->operands[0]->name);//函数名
         int paramNum = 0;
@@ -406,6 +411,7 @@ void transToAssem(FILE *fp, int index)
             addVarible(varListMem, (paramNum++) * 4 + 8, IRList[i]->operands[0]);
         }
 
+        int cnt = 0;
         for(int i=index+1; i<IRsize && IRList[i] ->kind!= FUNCTION_IR;i++ )//到下一个函数之前
         {
             InterCode temp = IRList[i];
@@ -421,6 +427,11 @@ void transToAssem(FILE *fp, int index)
             {
                 if (temp->kind == DEC_IR)
                 {
+                    if(cnt > 0) {
+                        fprintf(fp, "  addi $sp, $sp, %d\n", -4 * cnt);
+                        cnt = 0;
+                    }
+
                     offset -= temp->size + 4;
                     fprintf(fp, "  addi $sp, $sp, -%d\n", temp->size);
                     fprintf(fp, "  sw $sp, -4($sp)\n");
@@ -428,12 +439,17 @@ void transToAssem(FILE *fp, int index)
                     addVarible(varListMem, offset, op);
                 }
                 else
-                {
-                    fprintf(fp, "  addi $sp, $sp, -4\n");
+                {   
+                    cnt++;
+                    // fprintf(fp, "  addi $sp, $sp, -4\n");
                     offset -= 4;
                     addVarible(varListMem, offset, op);
                 }
             }
+        }
+        if(cnt > 0) {
+            fprintf(fp, "  addi $sp, $sp, %d\n", -4 * cnt);
+            cnt = 0;
         }
     }
     else if (kind == READ_IR)
@@ -461,19 +477,23 @@ void transToAssem(FILE *fp, int index)
     else if (kind == ASSIGN_IR)
     {
         int leftReg = saveToReg(fp, interCode->operands[0]);
+        if(leftReg != -1) {
         if (interCode->operands[1]->kind == CONSTANT_OP)
-        {
-            fprintf(fp, "  li %s, %s\n", regList[leftReg]->name, interCode->operands[1]->u.value);
+            {
+                fprintf(fp, "  li %s, %s\n", regList[leftReg]->name, interCode->operands[1]->u.value);
+            }
+            else
+            {
+                fprintf(fp, "  move %s, %s\n", regList[leftReg]->name, regList[saveToReg(fp, interCode->operands[1])]->name);
+            }
+            saveToStack(fp, leftReg, interCode->operands[0]);
         }
-        else
-        {
-            fprintf(fp, "  move %s, %s\n", regList[leftReg]->name, regList[saveToReg(fp, interCode->operands[1])]->name);
-        }
-        saveToStack(fp, leftReg, interCode->operands[0]);
     }
     else if (kind == PLUS_IR)
     {
         int leftReg = saveToReg(fp, interCode->operands[0]);
+        if(leftReg == -1)
+            return ;
         int c1 = atoi(interCode->operands[1]->u.value);
         int c2 = atoi(interCode->operands[2]->u.value);
         if (interCode->operands[1]->kind == CONSTANT_OP && interCode->operands[2]->kind == CONSTANT_OP)
@@ -488,7 +508,11 @@ void transToAssem(FILE *fp, int index)
     }
     else if (kind == MINUS_IR)
     {
+
         int leftReg = saveToReg(fp, interCode->operands[0]);
+        if(leftReg == -1)
+            return ;
+
         int c1 = atoi(interCode->operands[1]->u.value);
         int c2 = atoi(interCode->operands[2]->u.value);
         if (interCode->operands[1]->kind == CONSTANT_OP && interCode->operands[2]->kind == CONSTANT_OP)
@@ -502,6 +526,9 @@ void transToAssem(FILE *fp, int index)
     else if (kind == STAR_IR)
     {
         int leftReg = saveToReg(fp, interCode->operands[0]);
+        if(leftReg == -1)
+            return ;
+
         fprintf(fp, "  mul %s, %s, %s\n", regList[leftReg]->name, regList[saveToReg(fp, interCode->operands[1])]->name, regList[saveToReg(fp, interCode->operands[2])]->name);
         saveToStack(fp, leftReg, interCode->operands[0]);
     }
@@ -515,6 +542,9 @@ void transToAssem(FILE *fp, int index)
     else if (kind == QU_IR)
     {
         int leftReg = saveToReg(fp, interCode->operands[0]);
+        if(leftReg == -1)
+            return ;
+
         Varible *temp;
         for (temp = varListMem->head; strcmp(temp->op->name, interCode->operands[1]->name) != 0; temp = temp->next);
         fprintf(fp, "  lw %s, %d($gp)\n", regList[leftReg]->name, temp->reg);
@@ -524,11 +554,14 @@ void transToAssem(FILE *fp, int index)
     {
         
         int leftReg = saveToReg(fp, interCode->operands[0]);
+        if(leftReg == -1)
+            return ;
+
         fprintf(fp, "  lw %s, 0(%s)\n", regList[leftReg]->name, regList[saveToReg(fp, interCode->operands[1])]->name);
         saveToStack(fp, leftReg,  interCode->operands[0]);
     }
     else if (kind == ST_EQ_IR)
-    {
+    {   
         fprintf(fp, "  sw %s, 0(%s)\n", regList[saveToReg(fp, interCode->operands[1])]->name, regList[saveToReg(fp, interCode->operands[0])]->name);
     }
     else if (kind == GOTO_IR)
@@ -574,7 +607,13 @@ void transToAssem(FILE *fp, int index)
         offset -= 8;
         fprintf(fp, "  sw $ra, 0($sp)\n");
         fprintf(fp, "  sw $gp, 4($sp)\n");
-        fprintf(fp, "  jal %s\n", interCode->operands[1]->name);
+
+
+        if(strcmp(interCode->operands[1]->name, "main") == 0)
+            fprintf(fp, "  jal %s\n", interCode->operands[1]->name);
+        else
+            fprintf(fp, "  jal %s_func\n", interCode->operands[1]->name);
+
         fprintf(fp, "  move $sp, $gp\n");
         fprintf(fp, "  lw $ra, 0($sp)\n");
         fprintf(fp, "  lw $gp, 4($sp)\n");
@@ -584,8 +623,11 @@ void transToAssem(FILE *fp, int index)
             fprintf(fp, "  lw %s, %d($sp)\n", regList[i]->name, (i - T0) * 4);
         fprintf(fp, "  addi $sp, $sp, 72\n");
         offset += 72;
-        fprintf(fp, "  move %s, $v0\n", regList[leftReg]->name);
-        saveToStack(fp, leftReg, interCode->operands[0]);
+
+        if(leftReg != -1) {
+            fprintf(fp, "  move %s, $v0\n", regList[leftReg]->name);
+            saveToStack(fp, leftReg, interCode->operands[0]);
+        }
     }
     // 这些都不需要处理
     else if (kind == PARAM_IR || kind == DEC_IR || kind == ARG_IR){}
