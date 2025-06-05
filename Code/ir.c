@@ -9,6 +9,7 @@ int vnum = 1;	//v 变量
 InterCode *IRList; // IR表 动态数组
 int IRsize;
 int IRMAXSIZE;
+void repr(Operand op, FILE *fp);
 void repr2(Operand op, FILE *fp);
 
 extern FieldList hashTable[HASH_SIZE];
@@ -158,91 +159,91 @@ void printCode(char *filename) {
 		{
 		case LABEL_IR:
 			fputs("LABEL ", fp);
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			fputs(" : ", fp);
 			break;
 		case FUNCTION_IR:
 			fputs("FUNCTION ", fp);
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			fputs(" : ", fp);
 			break;
 		case ASSIGN_IR:
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			fputs(" := ", fp);
-			repr2(ir->operands[1], fp);
+			repr(ir->operands[1], fp);
 			break;
 		case PLUS_IR:
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			fputs(" := ", fp);
-			repr2(ir->operands[1], fp);
+			repr(ir->operands[1], fp);
 			fputs(" + ", fp);
-			repr2(ir->operands[2], fp);
+			repr(ir->operands[2], fp);
 			break;
 		case MINUS_IR:
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			fputs(" := ", fp);
-			repr2(ir->operands[1], fp);
+			repr(ir->operands[1], fp);
 			fputs(" - ", fp);
-			repr2(ir->operands[2], fp);
+			repr(ir->operands[2], fp);
 			break;
 		case STAR_IR:
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			fputs(" := ", fp);
-			repr2(ir->operands[1], fp);
+			repr(ir->operands[1], fp);
 			fputs(" * ", fp);
-			repr2(ir->operands[2], fp);
+			repr(ir->operands[2], fp);
 			break;
 		case DIV_IR:
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			fputs(" := ", fp);
-			repr2(ir->operands[1], fp);
+			repr(ir->operands[1], fp);
 			fputs(" / ", fp);
-			repr2(ir->operands[2], fp);
+			repr(ir->operands[2], fp);
 			break;
 		case ADDR_IR2:
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			fputs(" := &", fp);
-			repr2(ir->operands[1], fp);
+			repr(ir->operands[1], fp);
 			break;
 		case ADDR_IR3:
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			fputs(" := &", fp);
-			repr2(ir->operands[1], fp);
+			repr(ir->operands[1], fp);
 			fputs(" + ", fp);
-			repr2(ir->operands[2], fp);
+			repr(ir->operands[2], fp);
 			break;
 		case ADDR_VALUE_IR:
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			fputs(" := *", fp);
-			repr2(ir->operands[1], fp);
+			repr(ir->operands[1], fp);
 			break;
 		case MEMORY_IR:
 			fputs("*", fp);
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			fputs(" := ", fp);
-			repr2(ir->operands[1], fp);
+			repr(ir->operands[1], fp);
 			break;
 		case GOTO_IR:
 			fputs("GOTO ", fp);
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			break;
 		case IF_GOTO_IR:
 			fputs("IF ", fp);
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			fputs(" ", fp);
 			fputs(ir->relop, fp);
 			fputs(" ", fp);
-			repr2(ir->operands[1], fp);
+			repr(ir->operands[1], fp);
 			fputs(" GOTO ", fp);
-			repr2(ir->operands[2], fp);
+			repr(ir->operands[2], fp);
 			break;
 		case RETURN_IR:
 			fputs("RETURN ", fp);
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			break;
 		case DEC_IR:
 			fputs("DEC ", fp);
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			char str[10];
 			memset(str, 0, sizeof(str));
 			sprintf(str, " %d ", ir->size);
@@ -250,24 +251,24 @@ void printCode(char *filename) {
 			break;
 		case ARG_IR:
 			fputs("ARG ", fp);
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			break;
 		case CALL_IR:
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			fputs(" := CALL ", fp);
-			repr2(ir->operands[1], fp);
+			repr(ir->operands[1], fp);
 			break;
 		case PARAM_IR:
 			fputs("PARAM ", fp);
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			break;
 		case READ_IR:
 			fputs("READ ", fp);
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			break;
 		case WRITE_IR:
 			fputs("WRITE ", fp);
-			repr2(ir->operands[0], fp);
+			repr(ir->operands[0], fp);
 			break;
 		case DEBUG_IR:
 			fputs("DEBUG", fp);
@@ -294,6 +295,95 @@ void printCode(char *filename) {
 	}
 	fclose(fp);
 }
+
+void getName(char *filename)
+{
+		FILE *fp;
+	if (strcmp(filename, "stdout") == 0) {
+		fp = stdout;
+	}
+	else {
+		fp = fopen(filename, "w");
+	}
+	if (fp == NULL) {
+		printf("open file error!\n");
+		return;
+	}
+	//printf("the number of IR:%d\n",IRsize);
+	for (int i = 0; i < IRsize; i++) {
+		InterCode ir = IRList[i];
+		if (ir == NULL) {
+			continue;
+		}
+		switch (ir->kind) 
+		{
+		case LABEL_IR:
+			repr2(ir->operands[0], fp);
+			break;
+		case FUNCTION_IR:
+			repr2(ir->operands[0], fp);
+			break;
+		case ASSIGN_IR:
+			repr2(ir->operands[0], fp);
+			repr2(ir->operands[1], fp);
+			break;
+		case PLUS_IR:
+			repr2(ir->operands[0], fp);
+			repr2(ir->operands[1], fp);
+			repr2(ir->operands[2], fp);
+			break;
+		case MINUS_IR:
+			repr2(ir->operands[0], fp);
+			repr2(ir->operands[1], fp);
+			repr2(ir->operands[2], fp);
+			break;
+		case STAR_IR:
+			repr2(ir->operands[0], fp);
+			repr2(ir->operands[1], fp);
+			repr2(ir->operands[2], fp);
+			break;
+		case DIV_IR:
+			repr2(ir->operands[0], fp);
+			repr2(ir->operands[1], fp);
+			repr2(ir->operands[2], fp);
+			break;
+		case GOTO_IR:
+			repr2(ir->operands[0], fp);
+			break;
+		case IF_GOTO_IR:
+			repr2(ir->operands[0], fp);
+			repr2(ir->operands[1], fp);
+			repr2(ir->operands[2], fp);
+			break;
+		case RETURN_IR:
+			repr2(ir->operands[0], fp);
+			break;
+		case DEC_IR:
+			repr2(ir->operands[0], fp);
+			char str[10];
+			memset(str, 0, sizeof(str));
+			sprintf(str, " %d ", ir->size);
+			break;
+		case ARG_IR:
+			repr2(ir->operands[0], fp);
+			break;
+		case CALL_IR:
+			repr2(ir->operands[0], fp);
+			repr2(ir->operands[1], fp);
+			break;
+		case PARAM_IR:
+			repr2(ir->operands[0], fp);
+			break;
+		case READ_IR:
+			repr2(ir->operands[0], fp);
+			break;
+		case WRITE_IR:
+			repr2(ir->operands[0], fp);
+			break;
+		}
+	}
+}
+
 
 
 int getSpace(Type type) {
