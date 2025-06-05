@@ -42,45 +42,71 @@ void clearVarList(varList* varList) {
 }
 
 void addVarible(varList* varList, int reg, Operand op) {
-    Varible* var = (Varible*)malloc(sizeof(Varible));
-    var->reg = reg;
-    var->op = op;
-    var->next = NULL;
-    if (!varList->head) varList->head = varList->tail = var;
+    Varible* newVar = (Varible*)malloc(sizeof(Varible));
+    newVar->reg = reg;
+    newVar->op = op;
+    newVar->next = NULL;
+    if (varList->head == NULL) 
+        varList->head = newVar;
+    else 
+        varList->tail->next = newVar;
+    varList->tail = newVar;
+}
+void delVarible(varList* varList, Varible* var) {
+    if (var == varList->head)
+        varList->head = varList->head->next;
     else {
-        varList->tail->next = var;
-        varList->tail = var;
+        Varible* temp = varList->head;
+        while (temp&&temp->next != var) 
+            temp = temp->next;
+        if (varList->tail == var) 
+            varList->tail = temp;
+        temp->next = var->next;
     }
+    var->next = NULL;
+    free(var);
 }
 
-void delVarible(varList* varList, Varible* target) {
-    if (!varList || !target) return;
-    Varible *prev = NULL, *curr = varList->head;
-    while (curr) {
-        if (curr == target) {
-            if (prev) prev->next = curr->next;
-            else varList->head = curr->next;
-            if (varList->tail == curr) varList->tail = prev;
-            free(curr);
-            return;
-        }
-        prev = curr;
-        curr = curr->next;
+void saveToStack(FILE *fp, int reg, Operand op)
+{
+    Varible *temp;
+    for (temp = varListMem->head; temp != NULL ; temp = temp->next){
+        if (strcmp(temp->op->name, op->name) == 0) break;
+    }
+    fprintf(fp, "  sw %s, %d($gp)\n", regList[reg]->name, temp->reg);
+}
+
+
+int saveToReg(FILE* fp, Operand op) {
+    if (op->kind != CONSTANT_OP){
+        int reg = assignReg(op);
+        for(Varible* temp = varListMem->head;temp!=NULL;temp=temp->next)
+            if (strcmp(temp->op->name, op->name)==0){
+                    fprintf(fp, "  lw %s, %d($gp)\n", regList[reg]->name, temp->reg);
+                    return reg;
+                }
+        return reg;
+    }
+    else{
+        if (op->constant == 0)
+            return ZERO;
+        int reg = assignReg(op);
+        fprintf(fp, "  li %s, %d\n", regList[reg]->name, op->constant);
+        return reg;
     }
 }
 
 int assignReg(Operand op) {
-    int reg = last;
-    last = (last + 1 > REG_END ? REG_BEGIN : last + 1);
+    for (int i = T0; i <= T9; ++i) {
+        if (regList[i]->isEmpty) {
+            regList[i]->isEmpty = 0;
+            addVarible(varListReg, i, op);
+            return i;
+        }
+    }
+    Varible* temp = varListReg->head;
+    int reg = temp->reg;
+    delVarible(varListReg, temp);
+    addVarible(varListReg, reg, op);
     return reg;
-}
-
-int saveToReg(FILE* fp, Operand op) {
-    int reg = assignReg(op);
-    fprintf(fp, "  lw %s, -%d($fp)\n", regList[reg]->name, op->u.var_no * 4);
-    return reg;
-}
-
-void saveToStack(FILE* fp, int reg, Operand op) {
-    fprintf(fp, "  sw %s, -%d($fp)\n", regList[reg]->name, op->u.var_no * 4);
 }

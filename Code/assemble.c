@@ -589,10 +589,5 @@ void transToAssem(FILE *fp, int index)
     }
     // 这些都不需要处理
     else if (kind == PARAM_IR || kind == DEC_IR || kind == ARG_IR){}
-    else
-    {
-        printf(" error ir kind !\n");
-    }
 }
-
 
