@@ -3,8 +3,8 @@
 extern int IRsize;
 extern InterCode *IRList;
 
-VarList* varListReg;//寄存器变量表
-VarList* varListMem;//内存的变量表
+varList* varListReg;//寄存器变量表
+varList* varListMem;//内存的变量表
 int offset;
 Register* regList[32];
 int last;
@@ -295,8 +295,8 @@ void printAssemblyCode(FILE *fp)
     regList[0]->isEmpty = 0;
     last = 0;
 //变量表初始化
-    VarList* p1 = (VarList*)malloc(sizeof(VarList));p1->head = NULL; p1->tail = NULL;varListReg = p1;
-    VarList* p2 = (VarList*)malloc(sizeof(VarList));p2->head = NULL; p2->tail = NULL;varListMem = p2;
+    varList* p1 = (varList*)malloc(sizeof(varList));p1->head = NULL; p1->tail = NULL;varListReg = p1;
+    varList* p2 = (varList*)malloc(sizeof(varList));p2->head = NULL; p2->tail = NULL;varListMem = p2;
     offset=0;
 
     for(int i=0;i<IRsize;i++)
@@ -398,7 +398,7 @@ void transToAssem(FILE *fp, int index)
         offset = 0;
 }
 
-        FieldList field = search(interCode->operands[0]->name,1,0);//函数名
+        FieldList field = searchByName(interCode->operands[0]->name);//函数名
         int paramNum = 0;
 
         for(int i=index+1; i<IRsize && IRList[i] ->kind== PARAM_IR;i++ )//参数
@@ -561,7 +561,7 @@ void transToAssem(FILE *fp, int index)
         offset -= 72;
         for (int i = T0; i <= T9; ++i) fprintf(fp, "  sw %s, %d($sp)\n", regList[i]->name, (i - T0) * 4);
         int paramNum = 0;
-        int ParamNum = search(interCode->operands[1]->name,1,0)->type->u.function.paramNum;
+        int ParamNum = searchByName(interCode->operands[1]->name)->type->u.function.paramNum;
         fprintf(fp, "  addi $sp, $sp, -%d\n", ParamNum * 4);
         offset -= ParamNum * 4;
         for(int i = index-1; i<IRsize && paramNum<ParamNum; i--)

@@ -4,7 +4,7 @@
 #include "tree.h"
 #include "config.h"
 #include "ir.h"
-
+#include "assemble.h"
 void perror(const char *__s);
 int yyrestart();
 int yyparse();
@@ -45,6 +45,7 @@ int main(int argc, char** argv) {
         if(!has_struct) {
             tProgram(ast_root);
             printCode(argv[2]);
+            writeCode(argv[3]);
         }
     }
     return 0;

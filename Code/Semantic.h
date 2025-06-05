@@ -78,6 +78,7 @@ void initHashtable();
 int insert(FieldList f);
 //search会找外层的 用于判断是否未定义以使用 所以肯定是从当前层找
 FieldList search(char *name,int flag, int scope_id);
+FieldList searchByName(char *name);
 FieldList searchNode(Node* node);
 char* getType(Type type);
 

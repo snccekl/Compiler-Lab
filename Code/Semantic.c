@@ -201,6 +201,33 @@ FieldList search(
 	// return NULL;
 }
 
+
+FieldList searchByName(char* name) {
+    if(name == NULL){
+		return NULL;
+	}
+	unsigned int key;
+    key = hash_pjw(name);
+
+    FieldList found = NULL;
+    for(int offset = 0; offset < HASH_SIZE; offset++) {
+        int current_key = (key + offset) % HASH_SIZE;
+
+        FieldList p = hashTable[current_key];
+        if(p == NULL)
+            break;
+
+        if(strcmp(name, p->name) != 0)
+            continue;
+        
+        found = p;
+        break;
+    }
+    
+    return found;
+}
+
+
 FieldList searchNode(Node* node) {
     return search(node->token, node->flag, node->scope_id);
 }
